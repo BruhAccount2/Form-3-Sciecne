@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Chapter, Exercise, Difficulty } from '../../types';
 import { ChevronDown, ChevronUp, AlertCircle, Award, CheckCircle, HelpCircle } from 'lucide-react';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 
 interface ExercisesViewProps {
   chapter: Chapter;
@@ -120,14 +121,14 @@ const ExerciseCard: React.FC<{
 
       {/* Question Text */}
       <div className="mt-3 text-sm text-slate-800 dark:text-slate-200 leading-relaxed">
-        <p className="whitespace-pre-line">{exercise.question}</p>
+        <p className="whitespace-pre-line">{sanitizeContent(exercise.question)}</p>
 
         {exercise.subQuestions && exercise.subQuestions.length > 0 && (
           <div className="mt-3 space-y-2 pl-2">
             {exercise.subQuestions.map((sq, i) => (
               <div key={i} className="flex items-start justify-between gap-2 text-xs">
                 <span className="text-slate-700 dark:text-slate-300">
-                  <strong>{sq.label}</strong> {sq.question}
+                  <strong>{sq.label}</strong> {sanitizeContent(sq.question)}
                 </span>
                 <span className="shrink-0 text-slate-400 font-mono">[{sq.marks}m]</span>
               </div>
@@ -153,7 +154,7 @@ const ExerciseCard: React.FC<{
                 Final Answer:
               </span>
               <div className="rounded-lg border border-emerald-200 bg-white p-3 text-xs font-bold text-slate-900 dark:border-emerald-800 dark:bg-slate-950 dark:text-emerald-200 whitespace-pre-line font-mono-math">
-                {exercise.answer.finalAnswer}
+                {sanitizeContent(exercise.answer.finalAnswer)}
               </div>
             </div>
 
@@ -166,7 +167,7 @@ const ExerciseCard: React.FC<{
                 <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 space-y-1.5 font-mono text-[11px]">
                   {exercise.answer.fullWorking.map((step, sIdx) => (
                     <div key={sIdx} className="leading-relaxed">
-                      • {step}
+                      • {sanitizeContent(step)}
                     </div>
                   ))}
                 </div>

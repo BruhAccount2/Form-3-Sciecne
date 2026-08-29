@@ -3,7 +3,219 @@ export type SubjectType = 'science' | 'math';
 export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'simulation' | 'simulations' | 'techniques' | 'audit';
 export type TabType = ChapterTab;
 
-export type Difficulty = 'Basic' | 'Intermediate' | 'Application' | 'HOTS' | 'Challenging' | 'Recall' | 'Understanding';
+export type AppView = 
+  | 'home'
+  | 'subject'
+  | 'chapter'
+  | 'glossary'
+  | 'past_papers'
+  | 'formula_sheet'
+  | 'bookmarks'
+  | 'progress'
+  | 'quick_revision'
+  | 'daily_revision'
+  | 'random_practice'
+  | 'exam_mode'
+  | 'weak_areas'
+  | 'audit';
+
+export type Difficulty = 'Basic' | 'Intermediate' | 'Application' | 'HOTS' | 'Challenging' | 'Recall' | 'Understanding' | 'Easy' | 'Medium' | 'Hard' | 'Mixed';
+
+// --- GLOSSARY TYPES ---
+export interface GlossaryTerm {
+  id: string;
+  term: string;
+  simpleDefinition: string;
+  detailedExplanation: string;
+  formula?: string;
+  subject: SubjectType;
+  chapterId: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  example: string;
+  category?: string;
+  relatedTerms?: string[];
+}
+
+// --- PAST PAPERS TYPES ---
+export type PastPaperExamType = 'MRSM' | 'School' | 'District' | 'State' | 'Other';
+export type PastPaperDifficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
+
+export interface PastPaperQuestion {
+  number: number;
+  section: 'Section A' | 'Section B' | 'Section C';
+  question: string;
+  options?: string[];
+  marks: number;
+  topic: string;
+  chapterId: string;
+  diagramSvg?: string;
+  answer: {
+    finalAnswer: string;
+    markingScheme: string[];
+    explanation?: string;
+  };
+}
+
+export interface PastPaper {
+  id: string;
+  title: string;
+  year: number;
+  subject: SubjectType;
+  examType: PastPaperExamType;
+  paperSet: string;
+  source: string;
+  sourceTypeDescription: string; // e.g. "MRSM Standardized Assessment", "Trial SPM/PT3 Preparatory Paper"
+  difficulty: PastPaperDifficulty;
+  chaptersTested: string[];
+  durationMinutes: number;
+  totalMarks: number;
+  questionsCount: number;
+  officialOrPublicNote?: string;
+  externalLink?: string;
+  sections: {
+    name: string;
+    description: string;
+    totalMarks: number;
+    questions: PastPaperQuestion[];
+  }[];
+}
+
+// --- FORMULA SHEET TYPES ---
+export interface FormulaVariable {
+  symbol: string;
+  meaning: string;
+  unit?: string;
+}
+
+export interface FormulaItem {
+  id: string;
+  title: string;
+  subject: SubjectType;
+  chapterId: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  formula: string;
+  formulaInWords?: string;
+  meaningOfSymbols: FormulaVariable[];
+  units: string[];
+  example: {
+    question: string;
+    given: string;
+    stepByStepCalculation: string[];
+    finalAnswerWithUnit: string;
+  };
+  notes?: string;
+}
+
+// --- QUICK REVISION & DAILY REVISION TYPES ---
+export interface RapidFireQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  topic: string;
+}
+
+export interface QuickRevisionData {
+  chapterId: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  subject: SubjectType;
+  targetDurationMinutes: number; // e.g. 5-10 mins
+  keyDefinitions: { term: string; definition: string }[];
+  keyFacts: string[];
+  formulae: string[];
+  importantPoints: string[];
+  commonMistakes: {
+    mistake: string;
+    correction: string;
+    why: string;
+  }[];
+  rapidFireQuestions: RapidFireQuestion[];
+}
+
+// --- BOOKMARKS & HISTORY & WEAK AREAS ---
+export type BookmarkType = 'chapter' | 'note' | 'exercise' | 'glossary' | 'past_paper' | 'formula';
+
+export interface BookmarkItem {
+  id: string;
+  type: BookmarkType;
+  title: string;
+  subtitle: string;
+  subject: SubjectType;
+  targetId: string;
+  chapterId?: string;
+  tab?: ChapterTab;
+  dateAdded: number;
+}
+
+export interface RevisionHistoryItem {
+  timestamp: number;
+  type: 'chapter' | 'note' | 'exercise' | 'glossary' | 'past_paper' | 'formula' | 'quick_revision' | 'exam' | 'daily_revision' | 'random_practice';
+  subject: SubjectType;
+  title: string;
+  subtitle: string;
+  chapterId?: string;
+  targetId?: string;
+  tab?: ChapterTab;
+}
+
+export interface WeakAreaRecord {
+  chapterId: string;
+  subject: SubjectType;
+  chapterTitle: string;
+  chapterNumber: number;
+  wrongCount: number;
+  totalAttempted: number;
+  missedTopics: string[];
+  lastWrongTimestamp: number;
+  priority: 'high' | 'medium' | 'low';
+}
+
+// --- EXAM MODE & PRACTICE TYPES ---
+export interface ExamConfig {
+  subject: SubjectType | 'both';
+  questionCount: number;
+  timeLimitMinutes: number;
+  difficulty: PastPaperDifficulty;
+}
+
+export interface ExamQuestionItem {
+  id: string;
+  subject: SubjectType;
+  chapterId: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  topic: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  marks: number;
+  difficulty: Difficulty;
+  diagramSvg?: string;
+}
+
+export interface ExamSubmission {
+  id: string;
+  timestamp: number;
+  subject: SubjectType | 'both';
+  totalQuestions: number;
+  score: number;
+  percentage: number;
+  timeSpentSeconds: number;
+  timeLimitSeconds: number;
+  answers: {
+    questionId: string;
+    selectedOptionIndex: number | null;
+    isCorrect: boolean;
+    timeSpentSeconds?: number;
+  }[];
+  weakChapterIds: string[];
+  weakTopics: string[];
+}
 
 export interface LearningStandardCoverage {
   code: string; // e.g. "1.1.1", "1.2.3", "6.3.1"

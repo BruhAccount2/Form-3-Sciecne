@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Chapter, NoteSection, InteractiveElement, DiagramLabel } from '../../types';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 import { 
   Sparkles, 
   HelpCircle, 
@@ -133,7 +134,8 @@ export const NotesView: React.FC<NotesViewProps> = ({
 
 const formatRichText = (raw: string): string => {
   if (!raw) return '';
-  return raw
+  const sanitized = sanitizeContent(raw);
+  return sanitized
     // LaTeX fractions and symbols
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)')
     .replace(/\\times/g, '×')
