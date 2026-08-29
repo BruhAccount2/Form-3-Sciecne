@@ -1,6 +1,7 @@
 export type SubjectType = 'science' | 'math';
 
-export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'simulation' | 'simulations' | 'techniques' | 'audit';
+export type MainChapterSection = 'learn' | 'practise' | 'check';
+export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'simulation' | 'simulations' | 'techniques' | 'audit' | 'learn' | 'practise' | 'check';
 export type TabType = ChapterTab;
 
 export type AppView = 
@@ -17,9 +18,22 @@ export type AppView =
   | 'random_practice'
   | 'exam_mode'
   | 'weak_areas'
-  | 'audit';
+  | 'audit'
+  | 'print_notes';
 
 export type Difficulty = 'Basic' | 'Intermediate' | 'Application' | 'HOTS' | 'Challenging' | 'Recall' | 'Understanding' | 'Easy' | 'Medium' | 'Hard' | 'Mixed';
+
+export type MasteryStatus = 'mastered' | 'practising' | 'needs_revision' | 'unattempted';
+
+// --- PERSONAL NOTES ---
+export interface PersonalNote {
+  id: string;
+  targetId: string;
+  targetType: 'chapter' | 'standard' | 'note' | 'exercise';
+  targetTitle: string;
+  content: string;
+  updatedAt: number;
+}
 
 // --- GLOSSARY TYPES ---
 export interface GlossaryTerm {
@@ -220,11 +234,15 @@ export interface ExamSubmission {
 export interface LearningStandardCoverage {
   code: string; // e.g. "1.1.1", "1.2.3", "6.3.1"
   standard: string; // Learning standard title / outcome
+  parentChapterId?: string;
   notesCoverage: boolean;
   exerciseCoverage: boolean;
   answerCoverage: boolean;
   notesRef?: string;
   exerciseIds?: string[];
+  answerIds?: string[];
+  interactiveRef?: string;
+  masteryStatus?: MasteryStatus;
 }
 
 export interface DiagramLabel {
@@ -313,7 +331,9 @@ export interface Exercise {
   id: string;
   number: number;
   difficulty: Difficulty;
+  chapterId?: string;
   question: string;
+  hints?: string[];
   subQuestions?: {
     label: string;
     question: string;

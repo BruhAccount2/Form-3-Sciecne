@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Chapter, ChapterTab } from '../../types';
+import { Chapter, MainChapterSection, ChapterTab, MasteryStatus } from '../../types';
 import { NotesView } from './NotesView';
 import { ExercisesView } from './ExercisesView';
 import { AnswersView } from './AnswersView';
@@ -9,7 +9,33 @@ import { AnsweringTechniquesView } from './AnsweringTechniquesView';
 import { SimulationView } from './SimulationView';
 import { AuditView } from './AuditView';
 import { LearningStandardsAuditModal } from './LearningStandardsAuditModal';
-import { ArrowLeft, ArrowRight, Menu, X, Sparkles, Award, ShieldCheck } from 'lucide-react';
+import { computeChapterKSSMCoverage } from '../../utils/coverage';
+import { 
+  getStandardMastery, 
+  setStandardMastery, 
+  calculateChapterMastery,
+  recordLastActivity 
+} from '../../utils/storage';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Menu, 
+  X, 
+  Sparkles, 
+  Award, 
+  ShieldCheck, 
+  BookOpen, 
+  PenTool, 
+  CheckCircle2, 
+  Printer,
+  Compass,
+  FileText,
+  Sliders,
+  Check,
+  CircleDot,
+  Clock,
+  RotateCcw
+} from 'lucide-react';
 
 interface ChapterContainerProps {
   chapter: Chapter;
@@ -18,6 +44,7 @@ interface ChapterContainerProps {
   onSelectChapter: (ch: Chapter) => void;
   allSubjectChapters: Chapter[];
   onBackToSubject: () => void;
+  onOpenPrintView?: (chapter: Chapter) => void;
 }
 
 export const ChapterContainer: React.FC<ChapterContainerProps> = ({
@@ -26,47 +53,59 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
   onToggleComplete,
   onSelectChapter,
   allSubjectChapters,
-  onBackToSubject
+  onBackToSubject,
+  onOpenPrintView
 }) => {
-  const [activeTab, setActiveTab] = useState<ChapterTab>('notes');
+  const [mainSection, setMainSection] = useState<MainChapterSection>('learn');
+  const [learnSubTab, setLearnSubTab] = useState<'notes' | 'mindmap' | 'simulations' | 'experiments'>('notes');
+  const [practiseSubTab, setPractiseSubTab] = useState<'exercises' | 'answers' | 'techniques'>('exercises');
+  const [checkSubTab, setCheckSubTab] = useState<'coverage' | 'mastery'>('coverage');
+
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [masteryState, setMasteryState] = useState<Record<string, MasteryStatus>>({});
 
-  // Reset to notes when chapter changes
+  // Reset to learn/notes when chapter changes & track last activity
   useEffect(() => {
-    setActiveTab('notes');
+    setMainSection('learn');
+    setLearnSubTab('notes');
     setIsMobileSidebarOpen(false);
+    setMasteryState(getStandardMastery());
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    recordLastActivity({
+      lastChapterId: chapter.id,
+      lastSubject: chapter.subject,
+      lastChapterTitle: chapter.title,
+      lastChapterNumber: chapter.chapterNumber,
+      lastSection: 'learn'
+    });
   }, [chapter.id]);
 
   const currentIndex = allSubjectChapters.findIndex(c => c.id === chapter.id);
   const prevChapter = currentIndex > 0 ? allSubjectChapters[currentIndex - 1] : null;
   const nextChapter = currentIndex < allSubjectChapters.length - 1 ? allSubjectChapters[currentIndex + 1] : null;
 
-  // Tabs configuration
-  const tabs: { id: ChapterTab; label: string; count?: number; show?: boolean }[] = [
-    { id: 'notes', label: 'Notes' },
-    { id: 'exercises', label: 'Exercises', count: chapter.exercises.length },
-    { id: 'answers', label: 'Answers' },
-    { id: 'simulations', label: 'Interactive Lab' },
-    { id: 'audit', label: 'KSSM DSKP Matrix' },
-    { id: 'mindmap', label: 'Mindmap' },
-    { 
-      id: 'experiment', 
-      label: 'Experiments', 
-      show: chapter.subject === 'science' || (chapter.experiments && chapter.experiments.length > 0)
-    },
-    { id: 'techniques', label: 'Answering Techniques' }
-  ];
+  // Real Computed KSSM Coverage
+  const coverageData = computeChapterKSSMCoverage(chapter);
+  const masterySummary = calculateChapterMastery(chapter.learningStandards || []);
 
-  const visibleTabs = tabs.filter(t => t.show !== false);
+  const handleUpdateMastery = (code: string, status: MasteryStatus) => {
+    setStandardMastery(code, status);
+    setMasteryState({ ...getStandardMastery(), [code]: status });
+  };
 
-  const standards = chapter.learningStandards || [];
-  const totalCount = standards.length;
-  const completeCount = standards.filter(
-    s => s.notesCoverage && s.exerciseCoverage && s.answerCoverage
-  ).length;
-  const coveragePercentage = totalCount > 0 ? Math.round((completeCount / totalCount) * 100) : 100;
+  const jumpToStandard = (code: string) => {
+    setMainSection('learn');
+    setLearnSubTab('notes');
+    // Scroll smoothly to standard anchor if exists
+    setTimeout(() => {
+      const el = document.getElementById(`standard-${code}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  };
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row bg-[#F8FAFC] dark:bg-slate-950 text-[#1E293B] dark:text-slate-100 min-h-[calc(100vh-7rem)] transition-colors">
@@ -85,7 +124,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
       }`}>
         <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-blue-600 dark:text-blue-400">
               <ShieldCheck className="h-3.5 w-3.5" />
               <span>Official KSSM DSKP</span>
             </div>
@@ -126,11 +165,17 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
         {/* Sidebar Footer Back Link & Audit Quick Launch */}
         <div className="p-3 border-t border-gray-100 dark:border-slate-800 space-y-2">
           <button
-            onClick={() => setIsAuditModalOpen(true)}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold transition-colors"
+            onClick={() => {
+              setMainSection('check');
+              setCheckSubTab('coverage');
+            }}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 text-xs font-bold transition-colors"
           >
-            <Award className="h-3.5 w-3.5" />
-            <span>KSSM Coverage: {coveragePercentage}%</span>
+            <div className="flex items-center gap-1.5">
+              <Award className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+              <span>KSSM Coverage</span>
+            </div>
+            <span className="font-mono">{coverageData.coveredStandards}/{coverageData.totalStandards} ({coverageData.coveragePercentage}%)</span>
           </button>
 
           <button
@@ -146,79 +191,105 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
       {/* Main Section Content Area */}
       <section className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden min-w-0">
         
-        {/* Tab Navigation Header Bar */}
-        <div className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-4 sm:px-6 shrink-0">
+        {/* Top 3-Section Master Bar: Learn · Practise · Check */}
+        <div className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {/* Mobile Sidebar Toggle Button */}
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-white"
+              className="lg:hidden p-1.5 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-gray-200 dark:border-slate-700"
               aria-label="Open chapters menu"
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Tabs List */}
-            <nav className="h-12 flex items-center gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
-              {visibleTabs.map((t) => {
-                const isActive = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    id={`tab-${t.id}`}
-                    onClick={() => setActiveTab(t.id)}
-                    className={`text-sm h-full px-1 flex items-center gap-1.5 whitespace-nowrap transition-colors ${
-                      isActive
-                        ? 'font-bold border-b-2 border-[#2563EB] text-[#2563EB] dark:border-blue-400 dark:text-blue-400'
-                        : 'font-medium text-gray-500 hover:text-[#2563EB] dark:text-slate-400 dark:hover:text-blue-400'
-                    }`}
-                  >
-                    <span>{t.label}</span>
-                    {t.count !== undefined && (
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                        isActive 
-                          ? 'bg-blue-100 text-[#2563EB] dark:bg-blue-900 dark:text-blue-300' 
-                          : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'
-                      }`}>
-                        {t.count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
+            {/* 3 Core Section Switchers */}
+            <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
+              <button
+                onClick={() => {
+                  setMainSection('learn');
+                  recordLastActivity({ lastSection: 'learn' });
+                }}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  mainSection === 'learn'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Learn</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMainSection('practise');
+                  recordLastActivity({ lastSection: 'practise' });
+                }}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  mainSection === 'practise'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <PenTool className="h-4 w-4" />
+                <span>Practise</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                  {chapter.exercises.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMainSection('check');
+                  recordLastActivity({ lastSection: 'check' });
+                }}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  mainSection === 'check'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Check</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {coverageData.coveragePercentage}%
+                </span>
+              </button>
+            </div>
           </div>
 
-          {/* Quick Prev / Next Navigator on top right */}
-          <div className="hidden sm:flex items-center gap-3">
-            <button
-              onClick={() => setIsAuditModalOpen(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:opacity-90 transition"
-              title="Click to view full KSSM DSKP coverage audit matrix"
-            >
-              <ShieldCheck className="h-3.5 w-3.5" />
-              <span>Coverage: 100%</span>
-            </button>
+          {/* Quick Tools: Print Notes & Prev/Next */}
+          <div className="flex items-center gap-2.5">
+            {onOpenPrintView && (
+              <button
+                onClick={() => onOpenPrintView(chapter)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                title="Print clean revision notes without UI distractions"
+              >
+                <Printer className="h-3.5 w-3.5 text-slate-500" />
+                <span>Print Notes</span>
+              </button>
+            )}
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 pl-2 border-l border-slate-200 dark:border-slate-700">
               {prevChapter && (
                 <button
                   onClick={() => onSelectChapter(prevChapter)}
-                  className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
-                  title={`Previous: Ch ${prevChapter.chapterNumber} ${prevChapter.title}`}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  title={`Previous: Ch ${prevChapter.chapterNumber}`}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               )}
-              <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">
+              <span className="text-xs font-mono font-bold text-slate-400 dark:text-slate-500 px-1">
                 {chapter.chapterNumber}/{allSubjectChapters.length}
               </span>
               {nextChapter && (
                 <button
                   onClick={() => onSelectChapter(nextChapter)}
-                  className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
-                  title={`Next: Ch ${nextChapter.chapterNumber} ${nextChapter.title}`}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  title={`Next: Ch ${nextChapter.chapterNumber}`}
                 >
                   <ArrowRight className="h-4 w-4" />
                 </button>
@@ -228,23 +299,249 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
 
         </div>
 
+        {/* Secondary Sub-Tabs Strip for Active Section */}
+        <div className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-gray-200 dark:border-slate-800 px-4 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto scrollbar-none">
+          
+          {/* LEARN SUB-TABS */}
+          {mainSection === 'learn' && (
+            <>
+              <button
+                onClick={() => setLearnSubTab('notes')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  learnSubTab === 'notes'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                📝 Comprehensive Notes
+              </button>
+              <button
+                onClick={() => setLearnSubTab('mindmap')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  learnSubTab === 'mindmap'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                🗺️ Mindmap
+              </button>
+              <button
+                onClick={() => setLearnSubTab('simulations')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  learnSubTab === 'simulations'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                🧪 Interactive Lab
+              </button>
+              {chapter.subject === 'science' && (
+                <button
+                  onClick={() => setLearnSubTab('experiments')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                    learnSubTab === 'experiments'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  🔬 Core Experiments
+                </button>
+              )}
+            </>
+          )}
+
+          {/* PRACTISE SUB-TABS */}
+          {mainSection === 'practise' && (
+            <>
+              <button
+                onClick={() => setPractiseSubTab('exercises')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  practiseSubTab === 'exercises'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                📋 Tiered Exercises ({chapter.exercises.length})
+              </button>
+              <button
+                onClick={() => setPractiseSubTab('answers')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  practiseSubTab === 'answers'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                🔑 Step-by-Step Answer Bank
+              </button>
+              <button
+                onClick={() => setPractiseSubTab('techniques')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  practiseSubTab === 'techniques'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                🎯 Exam Answering Techniques
+              </button>
+            </>
+          )}
+
+          {/* CHECK SUB-TABS */}
+          {mainSection === 'check' && (
+            <>
+              <button
+                onClick={() => setCheckSubTab('coverage')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  checkSubTab === 'coverage'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                📊 KSSM DSKP Coverage Matrix
+              </button>
+              <button
+                onClick={() => setCheckSubTab('mastery')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  checkSubTab === 'mastery'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                🏆 Learning Standard Mastery Tracker
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Tab Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 leading-relaxed text-[#334155] dark:text-slate-300">
-          <div className="max-w-4xl mx-auto">
-            {activeTab === 'notes' && (
-              <NotesView
-                chapter={chapter}
-                isCompleted={isCompleted}
-                onToggleComplete={onToggleComplete}
-              />
+          <div className="max-w-4xl mx-auto space-y-6">
+
+            {/* LEARN SECTION RENDERING */}
+            {mainSection === 'learn' && (
+              <>
+                {learnSubTab === 'notes' && (
+                  <NotesView
+                    chapter={chapter}
+                    isCompleted={isCompleted}
+                    onToggleComplete={onToggleComplete}
+                  />
+                )}
+                {learnSubTab === 'mindmap' && <MindmapView chapter={chapter} />}
+                {learnSubTab === 'simulations' && <SimulationView chapter={chapter} />}
+                {learnSubTab === 'experiments' && <ExperimentView chapter={chapter} />}
+              </>
             )}
-            {activeTab === 'exercises' && <ExercisesView chapter={chapter} />}
-            {activeTab === 'answers' && <AnswersView chapter={chapter} />}
-            {activeTab === 'simulations' && <SimulationView chapter={chapter} />}
-            {activeTab === 'audit' && <AuditView chapter={chapter} />}
-            {activeTab === 'mindmap' && <MindmapView chapter={chapter} />}
-            {activeTab === 'experiment' && <ExperimentView chapter={chapter} />}
-            {activeTab === 'techniques' && <AnsweringTechniquesView chapter={chapter} />}
+
+            {/* PRACTISE SECTION RENDERING */}
+            {mainSection === 'practise' && (
+              <>
+                {practiseSubTab === 'exercises' && <ExercisesView chapter={chapter} />}
+                {practiseSubTab === 'answers' && <AnswersView chapter={chapter} />}
+                {practiseSubTab === 'techniques' && <AnsweringTechniquesView chapter={chapter} />}
+              </>
+            )}
+
+            {/* CHECK SECTION RENDERING */}
+            {mainSection === 'check' && (
+              <>
+                {checkSubTab === 'coverage' && <AuditView chapter={chapter} />}
+                
+                {checkSubTab === 'mastery' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="p-5 rounded-2xl border border-blue-200 bg-white dark:border-blue-900/60 dark:bg-slate-900 shadow-xs space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                            Personal Competency & Revision Status
+                          </span>
+                          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            Chapter {chapter.chapterNumber} Learning Standards Mastery
+                          </h2>
+                        </div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-900">
+                          Overall Mastery: {masterySummary.masteryPercentage}%
+                        </div>
+                      </div>
+
+                      {/* Mastery stats summary pill cards */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900">
+                          <span className="font-bold text-emerald-800 dark:text-emerald-300 block">🟢 Mastered</span>
+                          <span className="text-lg font-extrabold text-emerald-900 dark:text-emerald-200 font-mono">{masterySummary.masteredCount}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
+                          <span className="font-bold text-blue-800 dark:text-blue-300 block">🟡 Practising</span>
+                          <span className="text-lg font-extrabold text-blue-900 dark:text-blue-200 font-mono">{masterySummary.practisingCount}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900">
+                          <span className="font-bold text-rose-800 dark:text-rose-300 block">🔴 Needs Revision</span>
+                          <span className="text-lg font-extrabold text-rose-900 dark:text-rose-200 font-mono">{masterySummary.needsRevisionCount}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <span className="font-bold text-slate-700 dark:text-slate-300 block">⚪ Unattempted</span>
+                          <span className="text-lg font-extrabold text-slate-800 dark:text-slate-200 font-mono">{masterySummary.unattemptedCount}</span>
+                        </div>
+                      </div>
+
+                      {/* Standards interactive list */}
+                      <div className="space-y-3 pt-2">
+                        {chapter.learningStandards?.map((std) => {
+                          const currentStatus: MasteryStatus = masteryState[std.code] || 'unattempted';
+                          return (
+                            <div
+                              key={std.code}
+                              className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+                            >
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                    KSSM {std.code}
+                                  </span>
+                                  <button
+                                    onClick={() => jumpToStandard(std.code)}
+                                    className="text-xs text-blue-600 hover:underline dark:text-blue-400 font-medium"
+                                  >
+                                    View Notes ↗
+                                  </button>
+                                </div>
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                  {std.standard}
+                                </p>
+                              </div>
+
+                              {/* Mastery Status Selector */}
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {(
+                                  [
+                                    { id: 'mastered', label: 'Mastered', color: 'bg-emerald-600 text-white' },
+                                    { id: 'practising', label: 'Practising', color: 'bg-blue-600 text-white' },
+                                    { id: 'needs_revision', label: 'Needs Help', color: 'bg-rose-600 text-white' },
+                                    { id: 'unattempted', label: 'Reset', color: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' }
+                                  ] as const
+                                ).map((opt) => (
+                                  <button
+                                    key={opt.id}
+                                    onClick={() => handleUpdateMastery(std.code, opt.id)}
+                                    className={`px-2.5 py-1 text-xs rounded-lg font-bold transition ${
+                                      currentStatus === opt.id
+                                        ? opt.color
+                                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Bottom Prev / Next Navigation Footer */}
             <div className="flex items-center justify-between pt-10 mt-12 border-t border-gray-200 dark:border-slate-800 text-xs">

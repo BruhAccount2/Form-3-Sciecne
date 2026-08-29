@@ -19,6 +19,7 @@ import { BookmarksView } from './components/BookmarksView';
 import { WeakAreasView } from './components/WeakAreasView';
 import { ProgressView } from './components/ProgressView';
 import { AccessibilityModal } from './components/AccessibilityModal';
+import { PrintNotesModal } from './components/PrintNotesModal';
 
 export default function App() {
   // Theme state
@@ -72,6 +73,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState<boolean>(false);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState<boolean>(false);
+  const [printChapter, setPrintChapter] = useState<Chapter | null>(null);
 
   // Completed chapters stored in localStorage
   const [completedChapterIds, setCompletedChapterIds] = useState<string[]>(() => {
@@ -176,6 +178,7 @@ export default function App() {
             onSelectChapter={handleSelectChapter}
             allSubjectChapters={currentSubjectChapters}
             onBackToSubject={() => setActiveChapterId(null)}
+            onOpenPrintView={(ch) => setPrintChapter(ch)}
           />
         ) : activeSubject ? (
           <SubjectView
@@ -273,6 +276,13 @@ export default function App() {
         onToggleTheme={() => setDarkMode(prev => !prev)}
         fontSize={fontSize}
         onChangeFontSize={setFontSize}
+      />
+
+      {/* Printable Notes Modal */}
+      <PrintNotesModal
+        chapter={printChapter}
+        isOpen={!!printChapter}
+        onClose={() => setPrintChapter(null)}
       />
 
     </div>

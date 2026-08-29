@@ -4,7 +4,10 @@ import {
   WeakAreaRecord, 
   ExamSubmission, 
   SubjectType,
-  ChapterTab
+  ChapterTab,
+  MasteryStatus,
+  LearningStandardCoverage,
+  PersonalNote
 } from '../types';
 
 const STORAGE_KEYS = {
@@ -14,7 +17,11 @@ const STORAGE_KEYS = {
   PAST_PAPER_RECORDS: 'f3_past_papers_v2',
   EXAM_SUBMISSIONS: 'f3_exam_submissions_v2',
   CHAPTER_PROGRESS: 'f3_chapter_progress_v2',
-  ACCESSIBILITY: 'f3_accessibility_settings_v2'
+  ACCESSIBILITY: 'f3_accessibility_settings_v2',
+  STANDARD_MASTERY: 'f3_standard_mastery_v2',
+  PERSONAL_NOTES: 'f3_personal_notes_v2',
+  INCORRECT_QUESTIONS: 'f3_incorrect_questions_v2',
+  LAST_ACTIVITY: 'f3_last_activity_v2'
 };
 
 // Safe JSON parse helper
@@ -299,3 +306,173 @@ export function saveAccessibilitySettings(settings: Partial<AccessibilitySetting
   safeSet(STORAGE_KEYS.ACCESSIBILITY, updated);
   return updated;
 }
+
+// ==================== LEARNING STANDARD MASTERY ====================
+
+export function getStandardMastery(): Record<string, MasteryStatus> {
+  return safeGet<Record<string, MasteryStatus>>(STORAGE_KEYS.STANDARD_MASTERY, {});
+}
+
+export function setStandardMastery(standardCode: string, status: MasteryStatus): void {
+  const current = getStandardMastery();
+  current[standardCode] = status;
+  safeSet(STORAGE_KEYS.STANDARD_MASTERY, current);
+}
+
+export function calculateChapterMastery(standards: LearningStandardCoverage[]): {
+  masteryPercentage: number;
+  masteredCount: number;
+  practisingCount: number;
+  needsRevisionCount: number;
+  unattemptedCount: number;
+  totalStandards: number;
+} {
+  const masteryMap = getStandardMastery();
+  let masteredCount = 0;
+  let practisingCount = 0;
+  let needsRevisionCount = 0;
+  let unattemptedCount = 0;
+
+  standards.forEach(std => {
+    const status = masteryMap[std.code] || 'unattempted';
+    if (status === 'mastered') masteredCount += 1;
+    else if (status === 'practising') practisingCount += 1;
+    else if (status === 'needs_revision') needsRevisionCount += 1;
+    else unattemptedCount += 1;
+  });
+
+  const total = standards.length || 1;
+  // Weighted score: Mastered = 100%, Practising = 50%, Needs Revision = 25%
+  const weightedPoints = (masteredCount * 1.0) + (practisingCount * 0.5) + (needsRevisionCount * 0.25);
+  const masteryPercentage = Math.round((weightedPoints / total) * 100);
+
+  return {
+    masteryPercentage,
+    masteredCount,
+    practisingCount,
+    needsRevisionCount,
+    unattemptedCount,
+    totalStandards: standards.length
+  };
+}
+
+// ==================== PERSONAL NOTES ====================
+
+export function getPersonalNotes(): PersonalNote[] {
+  return safeGet<PersonalNote[]>(STORAGE_KEYS.PERSONAL_NOTES, []);
+}
+
+export function getPersonalNoteByTarget(targetId: string): PersonalNote | undefined {
+  const notes = getPersonalNotes();
+  return notes.find(n => n.targetId === targetId);
+}
+
+export function savePersonalNote(params: {
+  targetId: string;
+  targetType: 'chapter' | 'standard' | 'note' | 'exercise';
+  targetTitle: string;
+  content: string;
+}): PersonalNote {
+  const notes = getPersonalNotes();
+  const existingIdx = notes.findIndex(n => n.targetId === params.targetId);
+  
+  if (existingIdx >= 0) {
+    notes[existingIdx] = {
+      ...notes[existingIdx],
+      content: params.content,
+      updatedAt: Date.now()
+    };
+    safeSet(STORAGE_KEYS.PERSONAL_NOTES, notes);
+    return notes[existingIdx];
+  } else {
+    const newNote: PersonalNote = {
+      id: `note_${params.targetId}_${Date.now()}`,
+      targetId: params.targetId,
+      targetType: params.targetType,
+      targetTitle: params.targetTitle,
+      content: params.content,
+      updatedAt: Date.now()
+    };
+    notes.unshift(newNote);
+    safeSet(STORAGE_KEYS.PERSONAL_NOTES, notes);
+    return newNote;
+  }
+}
+
+export function deletePersonalNote(targetIdOrId: string): void {
+  const notes = getPersonalNotes();
+  const updated = notes.filter(n => n.id !== targetIdOrId && n.targetId !== targetIdOrId);
+  safeSet(STORAGE_KEYS.PERSONAL_NOTES, updated);
+}
+
+// ==================== INCORRECT QUESTIONS TRACKER ====================
+
+export interface IncorrectQuestionItem {
+  id: string;
+  chapterId: string;
+  subject: SubjectType;
+  chapterNumber: number;
+  chapterTitle: string;
+  questionNumber: number;
+  question: string;
+  learningStandardCode?: string;
+  difficulty: string;
+  marks: number;
+  answerFinal: string;
+  answerWorking: string[];
+  scientificReasoning?: string;
+  timestamp: number;
+}
+
+export function getIncorrectQuestions(): IncorrectQuestionItem[] {
+  return safeGet<IncorrectQuestionItem[]>(STORAGE_KEYS.INCORRECT_QUESTIONS, []);
+}
+
+export function recordIncorrectQuestion(item: Omit<IncorrectQuestionItem, 'timestamp'>): void {
+  const list = getIncorrectQuestions();
+  const filtered = list.filter(q => q.id !== item.id);
+  const updated = [
+    { ...item, timestamp: Date.now() },
+    ...filtered
+  ].slice(0, 50);
+  safeSet(STORAGE_KEYS.INCORRECT_QUESTIONS, updated);
+}
+
+export function removeIncorrectQuestion(questionId: string): void {
+  const list = getIncorrectQuestions();
+  const updated = list.filter(q => q.id !== questionId);
+  safeSet(STORAGE_KEYS.INCORRECT_QUESTIONS, updated);
+}
+
+// ==================== LAST ACTIVITY (CONTINUE REVISING) ====================
+
+export interface LastActivityState {
+  lastChapterId?: string;
+  lastSubject?: SubjectType;
+  lastChapterTitle?: string;
+  lastChapterNumber?: number;
+  lastSection?: 'learn' | 'practise' | 'check';
+  lastNoteTitle?: string;
+  lastExerciseId?: string;
+  lastQuestionNumber?: number;
+  lastGlossaryTermId?: string;
+  lastGlossaryTerm?: string;
+  lastPastPaperId?: string;
+  lastPastPaperTitle?: string;
+  timestamp: number;
+}
+
+export function getLastActivity(): LastActivityState | null {
+  return safeGet<LastActivityState | null>(STORAGE_KEYS.LAST_ACTIVITY, null);
+}
+
+export function recordLastActivity(state: Partial<LastActivityState>): void {
+  const current = getLastActivity() || { timestamp: Date.now() };
+  const updated: LastActivityState = {
+    ...current,
+    ...state,
+    timestamp: Date.now()
+  };
+  safeSet(STORAGE_KEYS.LAST_ACTIVITY, updated);
+}
+
