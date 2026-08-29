@@ -1,9 +1,19 @@
 export type SubjectType = 'science' | 'math';
 
-export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'techniques';
+export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'simulation' | 'simulations' | 'techniques' | 'audit';
 export type TabType = ChapterTab;
 
-export type Difficulty = 'Basic' | 'Intermediate' | 'Challenging' | 'HOTS';
+export type Difficulty = 'Basic' | 'Intermediate' | 'Application' | 'HOTS' | 'Challenging' | 'Recall' | 'Understanding';
+
+export interface LearningStandardCoverage {
+  code: string; // e.g. "1.1.1", "1.2.3", "6.3.1"
+  standard: string; // Learning standard title / outcome
+  notesCoverage: boolean;
+  exerciseCoverage: boolean;
+  answerCoverage: boolean;
+  notesRef?: string;
+  exerciseIds?: string[];
+}
 
 export interface DiagramLabel {
   id: string;
@@ -16,7 +26,7 @@ export interface DiagramLabel {
 
 export interface InteractiveElement {
   id: string;
-  type: 'reveal' | 'quiz' | 'calculator' | 'diagram' | 'stepper' | 'flashcard' | 'video' | 'image';
+  type: 'reveal' | 'quiz' | 'calculator' | 'diagram' | 'stepper' | 'flashcard' | 'simulation' | 'image';
   title: string;
   description?: string;
   prompt?: string;
@@ -41,14 +51,11 @@ export interface InteractiveElement {
     labels?: DiagramLabel[];
     interactiveType?: 'hotspots' | 'layers' | 'comparison';
   };
-  videoData?: {
-    youtubeId?: string;
-    videoUrl?: string;
-    thumbnailUrl?: string;
-    duration?: string;
-    channelOrSpeaker?: string;
-    videoSummary?: string;
-    keyLearningPoints?: string[];
+  simulationData?: {
+    simulationType?: string;
+    controls?: { label: string; min: number; max: number; step: number; defaultValue: number }[];
+    summary?: string;
+    keyPoints?: string[];
   };
   imageData?: {
     url?: string;
@@ -103,6 +110,7 @@ export interface Exercise {
   marks: number;
   diagramSvg?: string;
   diagramDescription?: string;
+  learningStandardCode?: string;
   answer: {
     finalAnswer: string;
     fullWorking: string[];
@@ -157,7 +165,7 @@ export interface AnsweringTechnique {
   markSchemeInsights?: string[];
   educationalReferences?: {
     title: string;
-    type: 'Video Reference' | 'Study Guide' | 'Exam Paper Technique';
+    type: 'Interactive Guide' | 'Study Guide' | 'Exam Paper Technique';
     urlPlaceholder?: string;
   }[];
 }
@@ -169,6 +177,7 @@ export interface Chapter {
   title: string;
   theme: string;
   summary: string;
+  learningStandards?: LearningStandardCoverage[];
   notes: NoteSection[];
   exercises: Exercise[];
   mindmap: MindmapNode;
@@ -176,3 +185,4 @@ export interface Chapter {
   experiments?: Experiment[];
   answeringTechniques: AnsweringTechnique[];
 }
+

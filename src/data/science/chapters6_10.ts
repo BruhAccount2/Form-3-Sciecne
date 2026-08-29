@@ -383,15 +383,12 @@ export const scienceChapters6to10: Chapter[] = [
         interactiveElements: [
           {
             id: 'sc-ch6-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Transformers & National Grid Electrical Transmission',
             description: 'Understand how alternating current induction works in transformers and why high voltage transmission reduces energy loss.',
-            videoData: {
-              youtubeId: 'ZjwzpoL1FPE',
-              duration: '8:30',
-              channelOrSpeaker: 'KSSM Physics & Science Portal',
-              videoSummary: 'Comprehensive visual explanation of electromagnetic mutual induction, calculation of turns ratios, and how the National Grid transmits power at 132kV/275kV/500kV.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Comprehensive visual explanation of electromagnetic mutual induction, calculation of turns ratios, and how the National Grid transmits power at 132kV/275kV/500kV.',
+              keyPoints: [
                 'Why transformers only function with alternating current (a.c.) and not direct current (d.c.)',
                 'How stepping up voltage reduces transmission current and heat loss (Power Loss = I²R)',
                 'The role of fuse, live, neutral, and earth wires in domestic 3-pin plugs',
@@ -1070,15 +1067,12 @@ export const scienceChapters6to10: Chapter[] = [
           },
           {
             id: 'sc-ch7-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Work, Power & Conservation of Mechanical Energy',
             description: 'Learn the core physics principles of work done against gravity, power ratings, and roller coaster energy conversions.',
-            videoData: {
-              youtubeId: 'w4QFJb9a8vo',
-              duration: '8:50',
-              channelOrSpeaker: 'KSSM Physics Mastery Hub',
-              videoSummary: 'Step-by-step physics calculations solving work done (W = Fs), power output (P = W/t), and demonstrating kinetic-potential energy conversion in falling bodies and pendulums.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step physics calculations solving work done (W = Fs), power output (P = W/t), and demonstrating kinetic-potential energy conversion in falling bodies and pendulums.',
+              keyPoints: [
                 'Why work is zero if displacement is perpendicular to force',
                 'How to convert units to SI (grams to kg, cm to metres, minutes to seconds)',
                 'Applying Ep = mgh and Ek = 0.5 mv² to free-fall calculations',
@@ -1276,15 +1270,12 @@ export const scienceChapters6to10: Chapter[] = [
           },
           {
             id: 'sc-ch8-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Radioactivity, Half-Life & Nuclear Safety',
             description: 'Learn the physics of spontaneous nuclear decay, half-life equations, background radiation, and medical radiotherapy.',
-            videoData: {
-              youtubeId: 'kWbC84s79bY',
-              duration: '8:40',
-              channelOrSpeaker: 'KSSM Nuclear Science Series',
-              videoSummary: 'Explore the difference between alpha, beta, and gamma radiation, calculate half-life decay chains, and understand how Cobalt-60 is used in cancer treatments and Carbon-14 in radiocarbon dating.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Explore the difference between alpha, beta, and gamma radiation, calculate half-life decay chains, and understand how Cobalt-60 is used in cancer treatments and Carbon-14 in radiocarbon dating.',
+              keyPoints: [
                 'Why unstable isotopes undergo spontaneous alpha, beta, or gamma decay',
                 'How to use the half-life equation: N = N0 × (1/2)^n',
                 'How Geiger-Müller counter detects ionizing radiation',
@@ -1585,15 +1576,12 @@ export const scienceChapters6to10: Chapter[] = [
           },
           {
             id: 'sc-ch9-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Sun Structure, Solar Storms & Earth Magnetosphere',
             description: 'Explore thermonuclear fusion inside the Sun, solar flare physics, and how Earth magnetic shield creates polar auroras.',
-            videoData: {
-              youtubeId: 'b22HKFMIfWo',
-              duration: '8:15',
-              channelOrSpeaker: 'KSSM Astronomy & Space Science',
-              videoSummary: 'Spectacular NASA and solar observatory footage showing sunspot cycles, coronal mass ejections crossing space, and geomagnetic storms impacting modern satellite infrastructure.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Spectacular NASA and solar observatory footage showing sunspot cycles, coronal mass ejections crossing space, and geomagnetic storms impacting modern satellite infrastructure.',
+              keyPoints: [
                 'The 6 structural layers of the Sun from core to outer corona',
                 'Why sunspots follow an 11-year solar activity cycle',
                 'How Earth magnetosphere shields the biosphere from lethal cosmic rays',
@@ -1809,15 +1797,12 @@ export const scienceChapters6to10: Chapter[] = [
           },
           {
             id: 'sc-ch10-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Solar System Models, Telescopes & Remote Sensing',
             description: 'Learn the history of astronomical models from Ptolemy to Kepler, space rockets, and satellite remote sensing technology.',
-            videoData: {
-              youtubeId: 'Z9tP34aV7eA',
-              duration: '8:45',
-              channelOrSpeaker: 'KSSM Astronomy & Aerospace',
-              videoSummary: 'Examine how Copernicus and Galileo revolutionized astrophysics, how rocket launch stages escape Earth gravity, and how Malaysia’s TiungSAT-1 and RazakSAT satellites perform Earth observation.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Examine how Copernicus and Galileo revolutionized astrophysics, how rocket launch stages escape Earth gravity, and how Malaysia’s TiungSAT-1 and RazakSAT satellites perform Earth observation.',
+              keyPoints: [
                 'Comparison of Geocentric (Ptolemy) vs Heliocentric (Copernicus/Kepler) models',
                 'Galileo telescope evidence: Moons of Jupiter and Venus phases',
                 'Space exploration timeline: Sputnik 1 (1957), Apollo 11 (1969), ISS, James Webb Telescope',

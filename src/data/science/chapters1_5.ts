@@ -163,15 +163,12 @@ export const scienceChapters1to5: Chapter[] = [
           },
           {
             id: 'sc-ch1-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Human Eye Accommodation & Vision Defects',
             description: 'Understand the optical focusing mechanism of the human eye and how concave and convex lenses correct myopia and hypermetropia.',
-            videoData: {
-              youtubeId: 'p_x-Sn4Zqvg',
-              duration: '8:45',
-              channelOrSpeaker: 'KSSM Science Form 3 Hub',
-              videoSummary: 'This video demonstrates how ciliary muscles adjust the lens curvature for near and distant vision, and visually illustrates why light rays focus in front of the retina in short-sightedness.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'This video demonstrates how ciliary muscles adjust the lens curvature for near and distant vision, and visually illustrates why light rays focus in front of the retina in short-sightedness.',
+              keyPoints: [
                 'How ciliary muscles contract to thicken the lens when viewing nearby objects',
                 'Why myopia causes distant light rays to converge in front of the retina',
                 'How diverging concave lenses correct short-sightedness',
@@ -546,7 +543,7 @@ export const scienceChapters1to5: Chapter[] = [
           'Examiners award 1 mark for specifying the exact lens type and 1 mark for mentioning that it focuses light "onto the retina".'
         ],
         educationalReferences: [
-          { title: 'KSSM Science Form 3 Chapter 1 Full Revision Video', type: 'Video Reference' },
+          { title: 'KSSM Science Form 3 Chapter 1 Full Revision Video', type: 'Interactive Guide' },
           { title: 'MRSM State Paper Scoring Guide: Stimuli and Responses', type: 'Exam Paper Technique' }
         ]
       }
@@ -737,15 +734,12 @@ export const scienceChapters1to5: Chapter[] = [
         interactiveElements: [
           {
             id: 'sc-ch2-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Alveolar Gas Diffusion & Respiratory Mechanics',
             description: 'Watch an animated demonstration of thoracic pressure changes driving airflow and how harmful pollutants destroy lung tissue.',
-            videoData: {
-              youtubeId: 'bSZerQ1Xkfg',
-              duration: '7:20',
-              channelOrSpeaker: 'KSSM Science Animation Series',
-              videoSummary: 'Explore the step-by-step mechanism of external intercostal and diaphragm contractions, followed by microscopic diffusion and the destructive effects of tar and emphysema.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Explore the step-by-step mechanism of external intercostal and diaphragm contractions, followed by microscopic diffusion and the destructive effects of tar and emphysema.',
+              keyPoints: [
                 'How diaphragm flattening lowers intra-alveolar pressure below atmospheric pressure',
                 'Why oxygen diffuses from higher partial pressure in alveoli to lower partial pressure in blood',
                 'The role of haemoglobin in transporting oxygen as oxyhaemoglobin',
@@ -1307,15 +1301,12 @@ export const scienceChapters1to5: Chapter[] = [
           },
           {
             id: 'sc-ch3-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Double Circulation & Heart Cardiac Cycle',
             description: 'Watch the synchronized pumping action of the atria, ventricles, and heart valves, alongside plant vascular transport.',
-            videoData: {
-              youtubeId: 'ruM4Xuhx3oo',
-              duration: '9:15',
-              channelOrSpeaker: 'KSSM Biology & Science Series',
-              videoSummary: 'Comprehensive visual walkthrough of the pulmonary and systemic circulatory loops, heart valve mechanics (lub-dub sound), and the ABO blood grouping rules.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Comprehensive visual walkthrough of the pulmonary and systemic circulatory loops, heart valve mechanics (lub-dub sound), and the ABO blood grouping rules.',
+              keyPoints: [
                 'Why mammalian double circulation maintains high systemic blood pressure',
                 'How the tricuspid and bicuspid (mitral) valves prevent regurgitation',
                 'Why the left ventricular myocardium is 3x thicker than the right',
@@ -1685,15 +1676,12 @@ export const scienceChapters1to5: Chapter[] = [
           },
           {
             id: 'sc-ch4-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Reactivity Series & Blast Furnace Iron Extraction',
             description: 'Watch the industrial smelting process inside a blast furnace and understand displacement rules based on the reactivity series.',
-            videoData: {
-              youtubeId: 'p2tM4yP_15E',
-              duration: '8:10',
-              channelOrSpeaker: 'KSSM Chemistry & Science Hub',
-              videoSummary: 'Detailed step-by-step chemical walkthrough of raw material reactions, thermal decomposition of limestone, and why carbon reduces iron but cannot reduce aluminium.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Detailed step-by-step chemical walkthrough of raw material reactions, thermal decomposition of limestone, and why carbon reduces iron but cannot reduce aluminium.',
+              keyPoints: [
                 'Why carbon is positioned between aluminium and zinc in the reactivity series',
                 'How carbon monoxide acts as the principal reducing agent in blast furnaces',
                 'The role of limestone in forming molten slag to remove silica impurities',
@@ -1913,15 +1901,12 @@ export const scienceChapters1to5: Chapter[] = [
           },
           {
             id: 'sc-ch5-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Thermochemistry & Practical Pack Chemistry',
             description: 'Learn the energy dynamics of exothermic combustion, endothermic dissolution, and the engineering of instant therapy packs.',
-            videoData: {
-              youtubeId: 'L-G7PGo9wko',
-              duration: '7:45',
-              channelOrSpeaker: 'KSSM Science & Chemistry Hub',
-              videoSummary: 'Clear experimental demonstrations measuring temperature changes with polystyrene cup calorimeters, and explaining why hot packs use CaCl2 while cold packs use NH4NO3.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Clear experimental demonstrations measuring temperature changes with polystyrene cup calorimeters, and explaining why hot packs use CaCl2 while cold packs use NH4NO3.',
+              keyPoints: [
                 'Why polystyrene cups are used to minimize heat exchange with the surroundings',
                 'How to calculate enthalpy change: ΔH = H_products - H_reactants',
                 'Why hot packs dilate blood vessels to soothe muscle cramps',

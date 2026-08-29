@@ -148,15 +148,12 @@ where $a$ is the **base** and $n$ is the **index / power / exponent**.
           },
           {
             id: 'math-ch1-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Laws of Indices & Solving Index Equations',
             description: 'Master the fundamental rules of exponents, algebraic fractional indices, and equating prime bases in exam questions.',
-            videoData: {
-              youtubeId: 'Wkgh3g2eEAU',
-              duration: '8:40',
-              channelOrSpeaker: 'KSSM Mathematics Mastery Hub',
-              videoSummary: 'Step-by-step mathematical walkthrough solving complex algebraic index fractions, applying negative exponents, and equating bases to solve exponential equations.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step mathematical walkthrough solving complex algebraic index fractions, applying negative exponents, and equating bases to solve exponential equations.',
+              keyPoints: [
                 'Always express numbers in prime base factors (2, 3, 5, 7) before equating indices',
                 'Do not multiply base by exponent (e.g. 2³ is 2×2×2 = 8, NOT 6)',
                 'How fractional indices relate to roots: a^(1/n) = n-th root of a',
@@ -493,15 +490,12 @@ where $a$ is the **base** and $n$ is the **index / power / exponent**.
           },
           {
             id: 'math-ch2-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Significant Figures & Standard Form Operations',
             description: 'Master significant figures rounding rules, converting large and micro quantities to scientific standard form, and arithmetic operations.',
-            videoData: {
-              youtubeId: 'k151V8Z3GvA',
-              duration: '8:10',
-              channelOrSpeaker: 'KSSM Form 3 Mathematics Portal',
-              videoSummary: 'Step-by-step video tutorial on rounding to specified significant figures, standard form multiplication and division rules, and factoring powers for addition.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video tutorial on rounding to specified significant figures, standard form multiplication and division rules, and factoring powers for addition.',
+              keyPoints: [
                 'How to identify significant vs non-significant zeros instantly',
                 'Converting decimal shifts into positive and negative powers of 10',
                 'Adding numbers in standard form by making the powers of 10 identical first',
@@ -816,15 +810,12 @@ where <span class="text-rose-600 dark:text-rose-400 font-bold">$1 \\le A < 10$</
           },
           {
             id: 'math-ch3-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Savings, Compound Interest, ROI & Credit Debt',
             description: 'Learn step-by-step calculations for compound interest frequencies, ROI for shares/properties, and loan instalment payments.',
-            videoData: {
-              youtubeId: 'Ff5gQvL77C0',
-              duration: '8:45',
-              channelOrSpeaker: 'KSSM Consumer Mathematics Hub',
-              videoSummary: 'Comprehensive practical guide solving SPM/PT3 consumer mathematics: calculating matured value MV, finding compounding frequency n, computing rental ROI, and credit card finance charges.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Comprehensive practical guide solving SPM/PT3 consumer mathematics: calculating matured value MV, finding compounding frequency n, computing rental ROI, and credit card finance charges.',
+              keyPoints: [
                 'How to set n: semi-annually (n=2), quarterly (n=4), monthly (n=12)',
                 'Calculating total return (capital gain + dividend - acquisition cost)',
                 'Calculating monthly flat-rate loan instalments: (P + Prt) / (12 × t)',
@@ -1102,15 +1093,12 @@ where <span class="text-rose-600 dark:text-rose-400 font-bold">$1 \\le A < 10$</
           },
           {
             id: 'math-ch4-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Scale Drawings & Grid Proportions',
             description: 'Master determining scale ratio 1 : n, drawing grid scale diagrams, and calculating real-world lengths and areas.',
-            videoData: {
-              youtubeId: 'v8Jz7wQ6R0E',
-              duration: '8:25',
-              channelOrSpeaker: 'KSSM Mathematics Geometry Series',
-              videoSummary: 'Step-by-step video tutorial on unit conversions, calculating n for enlargements vs reductions, and applying the squared area scale factor k².',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video tutorial on unit conversions, calculating n for enlargements vs reductions, and applying the squared area scale factor k².',
+              keyPoints: [
                 'How to convert both lengths to the exact same unit (cm to m, mm to cm)',
                 'Writing scales where drawing is larger than object (1 : 1/n)',
                 'Why all angles in a scale drawing remain strictly unchanged',
@@ -1378,15 +1366,12 @@ where <span class="text-rose-600 dark:text-rose-400 font-bold">$1 \\le A < 10$</
           },
           {
             id: 'math-ch5-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Trigonometric Ratios (SOH CAH TOA) & Special Angles',
             description: 'Master labelling Opposite, Adjacent and Hypotenuse sides, calculating angles of elevation and depression, and exact surd trigonometric values.',
-            videoData: {
-              youtubeId: '5tp74g4N8w8',
-              duration: '9:15',
-              channelOrSpeaker: 'KSSM Mathematics Trigonometry Series',
-              videoSummary: 'Step-by-step video tutorial demonstrating how to identify sides relative to angle θ, solving right-angled triangles with Pythagoras theorem, and calculating ladder/tree height word problems.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video tutorial demonstrating how to identify sides relative to angle θ, solving right-angled triangles with Pythagoras theorem, and calculating ladder/tree height word problems.',
+              keyPoints: [
                 'How to label Hypotenuse (opposite 90°), Opposite (facing θ), Adjacent (next to θ)',
                 'Remembering exact surds: sin 30° = 1/2, cos 30° = √3/2, tan 45° = 1',
                 'Angle of elevation (looking upwards from horizontal line) vs depression (looking down)',

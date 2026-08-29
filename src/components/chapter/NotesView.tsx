@@ -682,17 +682,17 @@ const InteractiveWidget: React.FC<{ element: InteractiveElement }> = ({ element 
     );
   }
 
-  if (element.type === 'video' && element.videoData) {
-    const vdata = element.videoData;
-    return (
-      <VideoWidget title={element.title} description={element.description} vdata={vdata} />
-    );
-  }
-
   if (element.type === 'image' && element.imageData) {
     const idata = element.imageData;
     return (
       <ImageWidget title={element.title} description={element.description} idata={idata} prompt={element.prompt} />
+    );
+  }
+
+  if (element.type === 'simulation' && element.simulationData) {
+    const sdata = element.simulationData;
+    return (
+      <InteractiveSimulationWidget title={element.title} description={element.description} sdata={sdata} />
     );
   }
 
@@ -708,10 +708,9 @@ const DiagramWidget: React.FC<{
   const [activeLabel, setActiveLabel] = useState<DiagramLabel | null>(
     data.labels && data.labels.length > 0 ? data.labels[0] : null
   );
-  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-indigo-100 bg-white p-4 dark:border-indigo-900/60 dark:bg-slate-900 shadow-sm transition-all">
+    <div className="rounded-xl border border-indigo-100 bg-white p-4 dark:border-indigo-900/60 dark:bg-slate-900 shadow-sm">
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -728,15 +727,6 @@ const DiagramWidget: React.FC<{
             </p>
           )}
         </div>
-
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 p-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
-          title="Toggle Expanded View"
-        >
-          <Maximize2 className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{isExpanded ? 'Compact' : 'Expand'}</span>
-        </button>
       </div>
 
       {prompt && (
@@ -747,9 +737,7 @@ const DiagramWidget: React.FC<{
 
       {/* SVG Diagram Canvas Area */}
       {data.svgContent && (
-        <div className={`relative overflow-hidden rounded-lg border border-gray-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 p-3 flex flex-col items-center justify-center transition-all ${
-          isExpanded ? 'min-h-[380px]' : 'min-h-[220px]'
-        }`}>
+        <div className="relative overflow-hidden rounded-lg border border-gray-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 p-3 flex flex-col items-center justify-center min-h-[220px]">
           <div 
             className="w-full flex justify-center items-center select-none"
             dangerouslySetInnerHTML={{ __html: data.svgContent }}
@@ -801,7 +789,7 @@ const DiagramWidget: React.FC<{
                   {activeLabel.name}
                 </span>
                 <span className="text-[10px] uppercase font-bold text-indigo-500 dark:text-indigo-400">
-                  Textbook Concept
+                  Concept Guide
                 </span>
               </div>
               <p className="text-xs text-indigo-950 dark:text-indigo-100 leading-relaxed">
@@ -815,404 +803,92 @@ const DiagramWidget: React.FC<{
   );
 };
 
-const VideoWidget: React.FC<{
+const InteractiveSimulationWidget: React.FC<{
   title: string;
   description?: string;
-  vdata: NonNullable<InteractiveElement['videoData']>;
-}> = ({ title, description, vdata }) => {
-  const [mode, setMode] = useState<'simulation' | 'youtube'>('simulation');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentScene, setCurrentScene] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  sdata: NonNullable<InteractiveElement['simulationData']>;
+}> = ({ title, description, sdata }) => {
+  const [activeStep, setActiveStep] = useState(0);
   const [checkedPoints, setCheckedPoints] = useState<Record<number, boolean>>({});
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate 4 structured visual scenes based on the key learning points
-  const scenes = React.useMemo(() => {
-    const points = vdata.keyLearningPoints || [
-      'Core biological/physical mechanism and definition',
-      'Step-by-step reaction dynamics or mathematical proof',
-      'Real-world applications and experimental controls',
-      'SPM/PT3 exam answering techniques and marking traps'
-    ];
-    
-    return [
-      {
-        tag: 'Scene 1: Fundamentals',
-        title: 'Core Concept & Principles',
-        summary: vdata.videoSummary || 'Understanding the primary mechanism and foundational principles of this topic.',
-        keyPoint: points[0] || 'Understand the primary anatomical or physical relationship.'
-      },
-      {
-        tag: 'Scene 2: Detailed Mechanism',
-        title: 'Anatomical / Mathematical Deep-Dive',
-        summary: 'Observe the dynamic interaction between components and how changes in parameters affect the system.',
-        keyPoint: points[1] || 'Identify changes in pressure, current, energy or coordinates.'
-      },
-      {
-        tag: 'Scene 3: Real Applications',
-        title: 'Practical Scenarios & Calculations',
-        summary: 'Applying the formulas, equations, or scientific laws to solve exam problems accurately.',
-        keyPoint: points[2] || 'Apply the relevant scientific formula with correct SI units.'
-      },
-      {
-        tag: 'Scene 4: Exam Mastery',
-        title: 'SPM / PT3 Marking Scheme & Pitfalls',
-        summary: 'Master the exact scoring keywords and avoid common student misconceptions.',
-        keyPoint: points[3] || 'Avoid common mistakes such as unit omission or misidentifying terms.'
-      }
-    ];
-  }, [vdata]);
-
-  // Auto-advance scene during simulation playback
-  useEffect(() => {
-    if (isPlaying && mode === 'simulation') {
-      const intervalDuration = Math.round(4000 / playbackSpeed);
-      timerRef.current = setTimeout(() => {
-        setCurrentScene((prev) => (prev + 1) % scenes.length);
-      }, intervalDuration);
-    }
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [isPlaying, currentScene, playbackSpeed, mode, scenes.length]);
-
-  // Speech Narration handling
-  const toggleSpeech = () => {
-    if (!('speechSynthesis' in window)) {
-      alert('Speech synthesis is not supported in this browser.');
-      return;
-    }
-
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    } else {
-      window.speechSynthesis.cancel();
-      const currentText = `${scenes[currentScene].title}. ${scenes[currentScene].summary}. Key takeaway: ${scenes[currentScene].keyPoint}`;
-      const utterance = new SpeechSynthesisUtterance(currentText);
-      utterance.rate = playbackSpeed;
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-
-  const togglePoint = (idx: number) => {
-    setCheckedPoints(prev => ({ ...prev, [idx]: !prev[idx] }));
-  };
-
-  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-    `KSSM Form 3 Science ${title}`
-  )}`;
-
-  const directYoutubeUrl = vdata.youtubeId
-    ? `https://www.youtube.com/watch?v=${vdata.youtubeId}`
-    : youtubeSearchUrl;
+  const points = sdata.keyPoints || [
+    'Understand the fundamental concept, definition, and scientific principles.',
+    'Trace step-by-step mechanisms, changes in variables, and dynamic reactions.',
+    'Apply formulas and quantitative relationships with standard SI units.',
+    'Master exact KSSM marking keywords and avoid common examination pitfalls.'
+  ];
 
   return (
-    <div className="rounded-2xl border border-rose-200/80 bg-white p-4 sm:p-5 dark:border-rose-900/40 dark:bg-slate-900 shadow-md overflow-hidden">
-      {/* Header with Title and Mode Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
+    <div className="rounded-2xl border border-indigo-200 bg-white p-5 dark:border-indigo-900/60 dark:bg-slate-900 shadow-sm space-y-4">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm">
-              <Film className="h-3.5 w-3.5" />
-            </span>
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
-              {title}
-            </span>
-          </div>
-          {description && (
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-              {description}
-            </p>
-          )}
+          <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            Interactive Visual Masterclass & Conceptual Simulator
+          </span>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            {title}
+          </h3>
         </div>
-
-        {/* Mode Selector Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-slate-800/80 rounded-xl self-start sm:self-auto text-xs font-semibold">
-          <button
-            onClick={() => {
-              setMode('simulation');
-              setIsPlaying(true);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              mode === 'simulation'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white'
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Interactive Simulator</span>
-          </button>
-          <button
-            onClick={() => {
-              setMode('youtube');
-              setIsPlaying(false);
-              if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-              setIsSpeaking(false);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              mode === 'youtube'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white'
-            }`}
-          >
-            <Tv className="h-3.5 w-3.5" />
-            <span>YouTube Stream</span>
-          </button>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-xs font-bold">
+          <Sparkles className="h-4 w-4" />
+          <span>Interactive Model</span>
         </div>
       </div>
 
-      {/* VIEWPORT 1: INTERACTIVE ANIMATED SIMULATION MASTERCLASS (Always Available) */}
-      {mode === 'simulation' ? (
-        <div className="space-y-4">
-          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-800 shadow-inner">
-            {/* Top Bar inside simulation viewport */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/80 backdrop-blur border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  <Radio className="h-2.5 w-2.5 animate-pulse text-rose-400" />
-                  {scenes[currentScene].tag}
-                </span>
-                <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
-                  {scenes[currentScene].title}
-                </span>
-              </div>
+      {description && (
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          {description}
+        </p>
+      )}
 
-              <div className="flex items-center gap-2">
-                {/* Speech Narration Button */}
-                <button
-                  onClick={toggleSpeech}
-                  className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md transition-all ${
-                    isSpeaking 
-                      ? 'bg-rose-500 text-white animate-pulse' 
-                      : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                  }`}
-                  title="Listen to voice narration"
-                >
-                  {isSpeaking ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
-                  <span>{isSpeaking ? 'Narrating...' : 'Voice'}</span>
-                </button>
-
-                {/* Speed Toggle */}
-                <button
-                  onClick={() => setPlaybackSpeed(s => (s === 1 ? 1.25 : s === 1.25 ? 1.5 : 1))}
-                  className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-300"
-                  title="Change playback speed"
-                >
-                  {playbackSpeed}x
-                </button>
-              </div>
-            </div>
-
-            {/* Visual Canvas Area */}
-            <div className="p-6 sm:p-8 min-h-[220px] flex flex-col justify-between">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 block mb-1">
-                  Mastery Stage {currentScene + 1} of {scenes.length}
-                </span>
-                <h4 className="text-lg sm:text-xl font-extrabold text-white mb-2 tracking-tight">
-                  {scenes[currentScene].title}
-                </h4>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-                  {scenes[currentScene].summary}
-                </p>
-              </div>
-
-              {/* Dynamic Highlight Card */}
-              <div className="mt-4 p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 backdrop-blur flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <div>
-                  <span className="text-[11px] font-bold text-rose-300 block mb-0.5">
-                    Crucial Syllabus Takeaway:
-                  </span>
-                  <p className="text-xs font-medium text-slate-100 leading-snug">
-                    {scenes[currentScene].keyPoint}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Controls & Timeline Scrubber */}
-            <div className="px-4 py-3 bg-slate-950/90 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-              {/* Scene Buttons */}
-              <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                {scenes.map((sc, sIdx) => (
-                  <button
-                    key={sIdx}
-                    onClick={() => setCurrentScene(sIdx)}
-                    className={`flex-1 sm:flex-none px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                      currentScene === sIdx
-                        ? 'bg-rose-600 text-white shadow'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                    }`}
-                  >
-                    Stage {sIdx + 1}
-                  </button>
-                ))}
-              </div>
-
-              {/* Playback Controls */}
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <button
-                  onClick={() => setCurrentScene(0)}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-                  title="Rewind to start"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </button>
-
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow transition-all"
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="h-3.5 w-3.5" />
-                      <span>Pause</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-3.5 w-3.5 fill-white" />
-                      <span>Auto Play</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setCurrentScene((prev) => (prev + 1) % scenes.length)}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-                  title="Next Stage"
-                >
-                  <FastForward className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* VIEWPORT 2: YOUTUBE OFFICIAL STREAM WITH FAIL-SAFE DIRECT BUTTONS */
-        <div className="space-y-3">
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md group">
-            {vdata.youtubeId ? (
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${vdata.youtubeId}?rel=0&modestbranding=1`}
-                title={title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-white bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950">
-                <Film className="h-12 w-12 text-rose-400 mb-3" />
-                <h4 className="text-sm sm:text-base font-bold mb-1">
-                  Full KSSM Video Lesson
-                </h4>
-                <p className="text-xs text-slate-300 max-w-sm mb-4">
-                  Watch official KSSM Science teacher lessons and walkthroughs directly on YouTube.
-                </p>
-                <a
-                  href={directYoutubeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg transition-all"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span>Launch Lesson on YouTube (New Tab)</span>
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Direct YouTube Link Fallback Bar */}
-          <div className="p-3 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 text-xs text-rose-950 dark:text-rose-200">
-              <Info className="h-4 w-4 text-rose-600 shrink-0" />
-              <span>
-                If YouTube iframe says &quot;Video unavailable&quot; due to browser permissions, open directly:
-              </span>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <a
-                href={directYoutubeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-sm"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                <span>Open in YouTube ↗</span>
-              </a>
-              <a
-                href={youtubeSearchUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-50 text-xs font-semibold transition-all"
-              >
-                <Search className="h-3.5 w-3.5" />
-                <span>Search DidikTV</span>
-              </a>
-            </div>
-          </div>
+      {/* Summary Box */}
+      {sdata.summary && (
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
+          {sdata.summary}
         </div>
       )}
 
-      {/* Interactive Key Takeaways Checklist */}
-      {vdata.keyLearningPoints && vdata.keyLearningPoints.length > 0 && (
-        <div className="mt-4 p-4 rounded-xl border border-gray-100 bg-gray-50/90 dark:border-slate-800 dark:bg-slate-950">
-          <div className="flex items-center justify-between mb-2.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
-              <BookCheck className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-              Interactive Comprehension Checklist:
-            </span>
-            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
-              {Object.values(checkedPoints).filter(Boolean).length} / {vdata.keyLearningPoints.length} Mastered
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {vdata.keyLearningPoints.map((point, pIdx) => {
-              const isChecked = !!checkedPoints[pIdx];
-              return (
-                <button
-                  key={pIdx}
-                  onClick={() => togglePoint(pIdx)}
-                  className={`flex items-start gap-2 p-2 rounded-lg text-left text-xs transition-all border ${
-                    isChecked
-                      ? 'bg-rose-50 border-rose-200 text-rose-950 dark:bg-rose-950/40 dark:border-rose-800/60 dark:text-rose-100 font-medium'
-                      : 'bg-white border-gray-200/80 text-gray-700 hover:border-rose-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300'
-                  }`}
-                >
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded mt-0.5 border ${
-                    isChecked 
-                      ? 'bg-rose-600 border-rose-600 text-white' 
-                      : 'border-gray-300 dark:border-slate-600 bg-transparent'
-                  }`}>
-                    {isChecked && <Check className="h-3 w-3" />}
-                  </span>
-                  <span className="leading-snug">{point}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Interactive Comprehension Checklist */}
+      <div className="space-y-2 pt-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Key Syllabus Checkpoints:
+          </span>
+          <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+            {Object.values(checkedPoints).filter(Boolean).length} / {points.length} Mastered
+          </span>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {points.map((pt, pIdx) => {
+            const isChecked = !!checkedPoints[pIdx];
+            return (
+              <button
+                key={pIdx}
+                onClick={() => setCheckedPoints(prev => ({ ...prev, [pIdx]: !prev[pIdx] }))}
+                className={`flex items-start gap-2.5 p-2.5 rounded-xl text-left text-xs transition border ${
+                  isChecked
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-950 dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-100 font-medium'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300'
+                }`}
+              >
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded mt-0.5 border ${
+                  isChecked
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'border-slate-300 dark:border-slate-600 bg-transparent'
+                }`}>
+                  {isChecked && <Check className="h-3 w-3" />}
+                </span>
+                <span className="leading-snug">{pt}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
+
 
 const ImageWidget: React.FC<{
   title: string;

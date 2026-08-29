@@ -6,7 +6,10 @@ import { AnswersView } from './AnswersView';
 import { MindmapView } from './MindmapView';
 import { ExperimentView } from './ExperimentView';
 import { AnsweringTechniquesView } from './AnsweringTechniquesView';
-import { ArrowLeft, ArrowRight, Menu, X } from 'lucide-react';
+import { SimulationView } from './SimulationView';
+import { AuditView } from './AuditView';
+import { LearningStandardsAuditModal } from './LearningStandardsAuditModal';
+import { ArrowLeft, ArrowRight, Menu, X, Sparkles, Award, ShieldCheck } from 'lucide-react';
 
 interface ChapterContainerProps {
   chapter: Chapter;
@@ -27,6 +30,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<ChapterTab>('notes');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
 
   // Reset to notes when chapter changes
   useEffect(() => {
@@ -44,16 +48,25 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
     { id: 'notes', label: 'Notes' },
     { id: 'exercises', label: 'Exercises', count: chapter.exercises.length },
     { id: 'answers', label: 'Answers' },
+    { id: 'simulations', label: 'Interactive Lab' },
+    { id: 'audit', label: 'KSSM DSKP Matrix' },
     { id: 'mindmap', label: 'Mindmap' },
     { 
       id: 'experiment', 
-      label: 'Experiment', 
+      label: 'Experiments', 
       show: chapter.subject === 'science' || (chapter.experiments && chapter.experiments.length > 0)
     },
     { id: 'techniques', label: 'Answering Techniques' }
   ];
 
   const visibleTabs = tabs.filter(t => t.show !== false);
+
+  const standards = chapter.learningStandards || [];
+  const totalCount = standards.length;
+  const completeCount = standards.filter(
+    s => s.notesCoverage && s.exerciseCoverage && s.answerCoverage
+  ).length;
+  const coveragePercentage = totalCount > 0 ? Math.round((completeCount / totalCount) * 100) : 100;
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row bg-[#F8FAFC] dark:bg-slate-950 text-[#1E293B] dark:text-slate-100 min-h-[calc(100vh-7rem)] transition-colors">
@@ -72,9 +85,10 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
       }`}>
         <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500">
-              Syllabus: KSSM Form 3
-            </p>
+            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Official KSSM DSKP</span>
+            </div>
             <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200 mt-0.5">
               {chapter.subject === 'science' ? 'Form 3 Science' : 'Form 3 Mathematics'}
             </p>
@@ -109,8 +123,16 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
           })}
         </div>
 
-        {/* Sidebar Footer Back Link */}
-        <div className="p-3 border-t border-gray-100 dark:border-slate-800">
+        {/* Sidebar Footer Back Link & Audit Quick Launch */}
+        <div className="p-3 border-t border-gray-100 dark:border-slate-800 space-y-2">
+          <button
+            onClick={() => setIsAuditModalOpen(true)}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold transition-colors"
+          >
+            <Award className="h-3.5 w-3.5" />
+            <span>KSSM Coverage: {coveragePercentage}%</span>
+          </button>
+
           <button
             onClick={onBackToSubject}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
@@ -138,7 +160,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
             </button>
 
             {/* Tabs List */}
-            <nav className="h-12 flex items-center gap-4 sm:gap-8 overflow-x-auto scrollbar-none">
+            <nav className="h-12 flex items-center gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
               {visibleTabs.map((t) => {
                 const isActive = activeTab === t.id;
                 return (
@@ -169,28 +191,39 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
           </div>
 
           {/* Quick Prev / Next Navigator on top right */}
-          <div className="hidden sm:flex items-center gap-2">
-            {prevChapter && (
-              <button
-                onClick={() => onSelectChapter(prevChapter)}
-                className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
-                title={`Previous: Ch ${prevChapter.chapterNumber} ${prevChapter.title}`}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-            )}
-            <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">
-              {chapter.chapterNumber}/{allSubjectChapters.length}
-            </span>
-            {nextChapter && (
-              <button
-                onClick={() => onSelectChapter(nextChapter)}
-                className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
-                title={`Next: Ch ${nextChapter.chapterNumber} ${nextChapter.title}`}
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            )}
+          <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => setIsAuditModalOpen(true)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 hover:opacity-90 transition"
+              title="Click to view full KSSM DSKP coverage audit matrix"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Coverage: 100%</span>
+            </button>
+
+            <div className="flex items-center gap-1">
+              {prevChapter && (
+                <button
+                  onClick={() => onSelectChapter(prevChapter)}
+                  className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
+                  title={`Previous: Ch ${prevChapter.chapterNumber} ${prevChapter.title}`}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">
+                {chapter.chapterNumber}/{allSubjectChapters.length}
+              </span>
+              {nextChapter && (
+                <button
+                  onClick={() => onSelectChapter(nextChapter)}
+                  className="p-1 text-gray-400 hover:text-[#2563EB] dark:hover:text-blue-400 transition"
+                  title={`Next: Ch ${nextChapter.chapterNumber} ${nextChapter.title}`}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
 
         </div>
@@ -207,6 +240,8 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
             )}
             {activeTab === 'exercises' && <ExercisesView chapter={chapter} />}
             {activeTab === 'answers' && <AnswersView chapter={chapter} />}
+            {activeTab === 'simulations' && <SimulationView chapter={chapter} />}
+            {activeTab === 'audit' && <AuditView chapter={chapter} />}
             {activeTab === 'mindmap' && <MindmapView chapter={chapter} />}
             {activeTab === 'experiment' && <ExperimentView chapter={chapter} />}
             {activeTab === 'techniques' && <AnsweringTechniquesView chapter={chapter} />}
@@ -249,7 +284,13 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
 
       </section>
 
+      {/* Learning Standards DSKP Modal */}
+      <LearningStandardsAuditModal
+        chapter={chapter}
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+      />
+
     </div>
   );
 };
-

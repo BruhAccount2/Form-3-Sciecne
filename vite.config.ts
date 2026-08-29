@@ -5,7 +5,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: './',
+    // Relative base allows the built app to run seamlessly in local dev, AI Studio preview, and GitHub Pages (/Form-3-Science/)
+    base: process.env.VITE_BASE_PATH || './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

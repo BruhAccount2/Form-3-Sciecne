@@ -128,15 +128,12 @@ export const mathChapters6to9: Chapter[] = [
           },
           {
             id: 'math-ch6-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Angles, Chords, Cyclic Quads & Tangents of Circles',
             description: 'Comprehensive guide covering angle at centre (2x), angles in same segment, cyclic quadrilaterals, and alternate segment theorem.',
-            videoData: {
-              youtubeId: 'q83F2fWvH8Y',
-              duration: '9:40',
-              channelOrSpeaker: 'KSSM Circle Geometry Series',
-              videoSummary: 'Step-by-step video solving PT3 and SPM circle geometry questions: identifying isosceles triangles with radii, alternate segment theorem, and two tangents from an external point.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video solving PT3 and SPM circle geometry questions: identifying isosceles triangles with radii, alternate segment theorem, and two tangents from an external point.',
+              keyPoints: [
                 'How to spot the "Arrowhead" (centre = 2 × circumference) and "Bow-tie" (same segment)',
                 'Angle in a semicircle is always 90° opposite the diameter',
                 'Cyclic quad: Opposite angles sum to 180°, exterior angle equals opposite interior angle',
@@ -377,15 +374,12 @@ export const mathChapters6to9: Chapter[] = [
           },
           {
             id: 'math-ch7-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Plans and Elevations Orthogonal Projections',
             description: 'Master drawing Plan (top view), Front Elevation, Side Elevation to full scale (1:1), and constructing hidden dashed lines accurately.',
-            videoData: {
-              youtubeId: 'b5b4L-9P3h8',
-              duration: '8:55',
-              channelOrSpeaker: 'KSSM Technical Drawing Series',
-              videoSummary: 'Comprehensive tutorial on drawing orthogonal projections for composite solids, aligning quadrants with a 45° line, and earning full method and accuracy marks.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Comprehensive tutorial on drawing orthogonal projections for composite solids, aligning quadrants with a 45° line, and earning full method and accuracy marks.',
+              keyPoints: [
                 'How to set up the 4 quadrants based on the viewing direction (from left vs from right)',
                 'Differentiating continuous solid lines (visible) and dashed lines (hidden)',
                 'Aligning heights horizontally and lengths vertically',
@@ -620,15 +614,12 @@ export const mathChapters6to9: Chapter[] = [
           },
           {
             id: 'math-ch8-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: The 5 Standard 2D Loci & Intersection Points',
             description: 'Learn step-by-step compass constructions for all 5 loci types and accurately finding intersection points ⊗ in composite shapes.',
-            videoData: {
-              youtubeId: 'p3kY7V9Q6uY',
-              duration: '8:40',
-              channelOrSpeaker: 'KSSM Geometric Constructions Lab',
-              videoSummary: 'Step-by-step video demonstrating compass techniques for constructing perpendicular bisectors, angle bisectors, and marking multi-condition intersection points.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video demonstrating compass techniques for constructing perpendicular bisectors, angle bisectors, and marking multi-condition intersection points.',
+              keyPoints: [
                 'How to distinguish equidistant from 2 points (perp bisector) vs 2 lines (angle bisector)',
                 'Leaving all pencil and compass construction arcs intact for full marks',
                 'Drawing circles for fixed distance from a point',
@@ -868,15 +859,12 @@ export const mathChapters6to9: Chapter[] = [
           },
           {
             id: 'math-ch9-vid1',
-            type: 'video',
+            type: 'simulation',
             title: 'Visual Masterclass: Gradient, Straight Line Equations & Parallel Lines',
             description: 'Master calculating gradients from two points and intercepts, converting to y = mx + c, and solving simultaneous line intersections.',
-            videoData: {
-              youtubeId: 'b9k1A3z4M8g',
-              duration: '9:05',
-              channelOrSpeaker: 'KSSM Coordinate Geometry Series',
-              videoSummary: 'Step-by-step video solving PT3 and SPM coordinate geometry problems: converting ax + by = c to gradient-intercept form, parallel line equations through a point, and perpendicular bisector lines.',
-              keyLearningPoints: [
+            simulationData: {
+              summary: 'Step-by-step video solving PT3 and SPM coordinate geometry problems: converting ax + by = c to gradient-intercept form, parallel line equations through a point, and perpendicular bisector lines.',
+              keyPoints: [
                 'How to rearrange general equation ax + by = c into y = mx + c to isolate gradient m',
                 'Why gradient from intercepts has a negative sign: m = - (b / a)',
                 'Finding parallel line equations passing through a specified point (x₁, y₁)',
