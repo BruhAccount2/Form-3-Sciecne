@@ -16,10 +16,12 @@ export type AppView =
   | 'quick_revision'
   | 'daily_revision'
   | 'random_practice'
+  | 'exam'
   | 'exam_mode'
   | 'weak_areas'
   | 'audit'
-  | 'print_notes';
+  | 'print_notes'
+  | 'settings';
 
 export type Difficulty = 'Basic' | 'Intermediate' | 'Application' | 'HOTS' | 'Challenging' | 'Recall' | 'Understanding' | 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 

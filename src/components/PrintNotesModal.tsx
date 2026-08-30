@@ -98,40 +98,46 @@ export const PrintNotesModal: React.FC<PrintNotesModalProps> = ({
                   dangerouslySetInnerHTML={{ __html: sanitizeContent(section.content) }}
                 />
 
-                {/* Key Points */}
-                {section.keyPoints && section.keyPoints.length > 0 && (
-                  <div className="p-3 bg-slate-100 rounded-lg border-l-4 border-slate-800 text-xs space-y-1">
-                    <span className="font-bold text-slate-900 block">Key Summary Points:</span>
-                    <ul className="list-disc list-inside space-y-0.5 text-slate-700">
-                      {section.keyPoints.map((pt, pIdx) => (
-                        <li key={pIdx} dangerouslySetInnerHTML={{ __html: sanitizeContent(pt) }} />
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Formula / Rule */}
-                {section.formula && (
-                  <div className="p-3 border border-slate-300 rounded-lg text-xs bg-slate-50 font-mono">
-                    <span className="font-bold font-sans block mb-1">Standard Formula / Rule:</span>
-                    <div dangerouslySetInnerHTML={{ __html: sanitizeContent(section.formula) }} />
-                  </div>
-                )}
-
-                {/* Worked Examples */}
-                {section.workedExamples && section.workedExamples.length > 0 && (
+                {/* Key Formulas */}
+                {section.keyFormulas && section.keyFormulas.length > 0 && (
                   <div className="space-y-2 pt-1">
-                    <span className="text-xs font-bold text-slate-900 block">Worked Example:</span>
-                    {section.workedExamples.map((ex, exIdx) => (
-                      <div key={exIdx} className="p-3 border border-slate-200 rounded-lg text-xs space-y-1">
-                        <div className="font-semibold text-slate-900">{ex.question}</div>
-                        <div className="text-slate-700 font-mono pl-2 border-l-2 border-slate-300">
-                          {ex.solution.map((step, sIdx) => (
-                            <div key={sIdx} dangerouslySetInnerHTML={{ __html: sanitizeContent(step) }} />
-                          ))}
-                        </div>
+                    {section.keyFormulas.map((kf, kfIdx) => (
+                      <div key={kfIdx} className="p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs space-y-1.5">
+                        <span className="font-bold text-slate-900 block">{kf.name}</span>
+                        <div className="font-semibold text-blue-900 bg-blue-50 p-2 rounded border border-blue-100" dangerouslySetInnerHTML={{ __html: sanitizeContent(kf.formulaInWords) }} />
+                        {kf.howToUse && kf.howToUse.length > 0 && (
+                          <div className="text-slate-700 space-y-0.5">
+                            <span className="font-semibold text-slate-800 text-[11px]">Steps / Method:</span>
+                            <ol className="list-decimal list-inside pl-1 space-y-0.5">
+                              {kf.howToUse.map((step, stIdx) => (
+                                <li key={stIdx} dangerouslySetInnerHTML={{ __html: sanitizeContent(step) }} />
+                              ))}
+                            </ol>
+                          </div>
+                        )}
+                        {kf.wordExample && (
+                          <div className="text-slate-700 bg-white p-2 rounded border border-slate-200 text-[11px]">
+                            <span className="font-semibold text-slate-900">Example: </span>
+                            <span dangerouslySetInnerHTML={{ __html: sanitizeContent(kf.wordExample) }} />
+                          </div>
+                        )}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Definitions */}
+                {section.definitions && section.definitions.length > 0 && (
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5">
+                    <span className="font-bold text-slate-900 block">Key Definitions:</span>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {section.definitions.map((def, dIdx) => (
+                        <div key={dIdx} className="text-slate-700">
+                          <strong className="text-slate-900">{def.term}: </strong>
+                          <span dangerouslySetInnerHTML={{ __html: sanitizeContent(def.definition) }} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { QuickRevisionData, SubjectType } from '../types';
 import { quickRevisionDataList } from '../data/quickRevision';
 import { recordQuestionAttempt, recordRevisionActivity } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   Zap, 
   Clock, 
@@ -126,10 +127,10 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                   {currentModule.keyDefinitions.map((def, dIdx) => (
                     <div key={dIdx} className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
                       <span className="font-bold text-slate-900 dark:text-slate-100 block mb-1">
-                        {def.term}
+                        {sanitizeContent(def.term)}
                       </span>
                       <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                        {def.definition}
+                        {sanitizeContent(def.definition)}
                       </p>
                     </div>
                   ))}
@@ -145,7 +146,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                   {currentModule.keyFacts.map((fact, fIdx) => (
                     <div key={fIdx} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                       <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                      <span>{fact}</span>
+                      <span>{sanitizeContent(fact)}</span>
                     </div>
                   ))}
                 </div>
@@ -159,7 +160,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                   </h3>
                   <div className="p-3.5 bg-blue-50/50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900/50 font-mono text-xs text-blue-900 dark:text-blue-200 space-y-1">
                     {currentModule.formulae.map((form, formIdx) => (
-                      <div key={formIdx} className="font-semibold">• {form}</div>
+                      <div key={formIdx} className="font-semibold">• {sanitizeContent(form)}</div>
                     ))}
                   </div>
                 </div>
@@ -178,14 +179,14 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                     <div key={mIdx} className="p-4 bg-rose-50/60 dark:bg-rose-950/20 rounded-lg border border-rose-100 dark:border-rose-900/40 text-xs space-y-1.5">
                       <div className="flex items-center gap-1.5 text-rose-800 dark:text-rose-300 font-semibold">
                         <XCircle className="w-4 h-4 shrink-0" />
-                        Common Mistake: {mistake.mistake}
+                        Common Mistake: {sanitizeContent(mistake.mistake)}
                       </div>
                       <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-semibold">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        Correction: {mistake.correction}
+                        Correction: {sanitizeContent(mistake.correction)}
                       </div>
                       <p className="text-2xs text-slate-600 dark:text-slate-400 pl-5 italic">
-                        Why: {mistake.why}
+                        Why: {sanitizeContent(mistake.why)}
                       </p>
                     </div>
                   ))}
@@ -214,7 +215,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                   return (
                     <div key={q.id} className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-3">
                       <div className="font-semibold text-slate-900 dark:text-slate-100 leading-snug">
-                        {qIdx + 1}. {q.question}
+                        {qIdx + 1}. {sanitizeContent(q.question)}
                       </div>
 
                       <div className="space-y-1.5">
@@ -238,7 +239,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                               onClick={() => handleSelectOption(q.id, optIdx, q.correctIndex, q.topic)}
                               className={`w-full text-left p-2.5 rounded-lg border text-2xs transition-all flex items-center justify-between ${btnClasses}`}
                             >
-                              <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                              <span>{String.fromCharCode(65 + optIdx)}. {sanitizeContent(opt)}</span>
                               {isAnswered && isThisCorrect && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
                               {isAnswered && isThisChosen && !isCorrect && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
                             </button>
@@ -251,7 +252,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
                           <span className="font-semibold block text-slate-900 dark:text-slate-200 mb-0.5">
                             Explanation:
                           </span>
-                          {q.explanation}
+                          {sanitizeContent(q.explanation)}
                         </div>
                       )}
                     </div>

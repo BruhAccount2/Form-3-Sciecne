@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chapter } from '../../types';
 import { Target, CheckCircle2, AlertTriangle, Lightbulb, Compass, Award } from 'lucide-react';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 
 interface AnsweringTechniquesViewProps {
   chapter: Chapter;
@@ -41,10 +42,10 @@ export const AnsweringTechniquesView: React.FC<AnsweringTechniquesViewProps> = (
           >
             <div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                {tech.category}
+                {sanitizeContent(tech.category)}
               </span>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                {tech.title}
+                {sanitizeContent(tech.title)}
               </h3>
             </div>
 
@@ -61,7 +62,7 @@ export const AnsweringTechniquesView: React.FC<AnsweringTechniquesViewProps> = (
                     className="flex items-start gap-2 rounded-lg bg-white p-2.5 text-xs text-slate-800 border border-emerald-100 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
-                    <span className="leading-snug">{kw}</span>
+                    <span className="leading-snug">{sanitizeContent(kw)}</span>
                   </div>
                 ))}
               </div>
@@ -79,7 +80,7 @@ export const AnsweringTechniquesView: React.FC<AnsweringTechniquesViewProps> = (
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white dark:bg-blue-500">
                       {sIdx + 1}
                     </span>
-                    <span className="leading-relaxed">{step}</span>
+                    <span className="leading-relaxed">{sanitizeContent(step)}</span>
                   </li>
                 ))}
               </ol>
@@ -96,7 +97,7 @@ export const AnsweringTechniquesView: React.FC<AnsweringTechniquesViewProps> = (
                   {tech.commonErrorsToAvoid.map((err, eIdx) => (
                     <li key={eIdx} className="flex items-start gap-2">
                       <span className="text-rose-600 font-bold shrink-0">✗</span>
-                      <span className="leading-relaxed">{err}</span>
+                      <span className="leading-relaxed">{sanitizeContent(err)}</span>
                     </li>
                   ))}
                 </ul>

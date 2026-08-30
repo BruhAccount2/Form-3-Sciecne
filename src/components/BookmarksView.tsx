@@ -140,7 +140,7 @@ export const BookmarksView: React.FC<BookmarksViewProps> = ({
 
               <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="text-2xs text-slate-400">
-                  Saved {new Date(item.timestamp).toLocaleDateString()}
+                  Saved {new Date(item.dateAdded || Date.now()).toLocaleDateString()}
                 </span>
                 <button
                   onClick={() => handleOpenItem(item)}

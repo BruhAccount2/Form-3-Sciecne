@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WeakAreaRecord } from '../types';
 import { getWeakAreas, clearWeakArea } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   AlertTriangle, 
   CheckCircle2, 
@@ -26,13 +27,13 @@ export const WeakAreasView: React.FC<WeakAreasViewProps> = ({ onNavigateChapter,
     setWeakAreas(getWeakAreas());
   }, []);
 
-  const handleClear = (id: string) => {
-    clearWeakArea(id);
+  const handleClear = (chapterId: string) => {
+    clearWeakArea(chapterId);
     setWeakAreas(getWeakAreas());
   };
 
-  const highPriority = weakAreas.filter(w => w.accuracy < 50 && w.attemptsCount >= 2);
-  const mediumPriority = weakAreas.filter(w => w.accuracy >= 50 && w.accuracy < 75);
+  const highPriority = weakAreas.filter(w => w.priority === 'high');
+  const mediumPriority = weakAreas.filter(w => w.priority === 'medium');
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -65,55 +66,72 @@ export const WeakAreasView: React.FC<WeakAreasViewProps> = ({ onNavigateChapter,
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {weakAreas.map(item => (
-              <div
-                key={item.id}
-                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-semibold ${
-                      item.subject === 'math'
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                        : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                    }`}>
-                      {item.subject === 'math' ? 'Mathematics' : 'Science'} Ch {item.chapterNumber}
-                    </span>
-                    <span className={`text-2xs font-bold px-2 py-0.5 rounded-full ${
-                      item.accuracy < 50
-                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                    }`}>
-                      {item.accuracy}% Accuracy
-                    </span>
+            {weakAreas.map(item => {
+              const accuracy = Math.max(0, Math.round(((item.totalAttempted - item.wrongCount) / Math.max(1, item.totalAttempted)) * 100));
+              return (
+                <div
+                  key={item.chapterId}
+                  className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-semibold ${
+                        item.subject === 'math'
+                          ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                          : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                      }`}>
+                        {item.subject === 'math' ? 'Mathematics' : 'Science'} Ch {item.chapterNumber}
+                      </span>
+                      <span className={`text-2xs font-bold px-2 py-0.5 rounded-full ${
+                        item.priority === 'high'
+                          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                      }`}>
+                        {accuracy}% Accuracy ({item.priority.toUpperCase()} Priority)
+                      </span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Chapter {item.chapterNumber}: {sanitizeContent(item.chapterTitle)}
+                    </h3>
+                    
+                    {item.missedTopics && item.missedTopics.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Needs review on:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {item.missedTopics.map((topic, tIdx) => (
+                            <span key={tIdx} className="text-[10px] bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 px-1.5 py-0.5 rounded border border-rose-100 dark:border-rose-900/60">
+                              {sanitizeContent(topic)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-slate-500 mt-2">
+                      {item.wrongCount} mistake{item.wrongCount > 1 ? 's' : ''} recorded in {item.totalAttempted} attempt{item.totalAttempted > 1 ? 's' : ''}
+                    </p>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {item.topic}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {item.chapterTitle} • {item.incorrectCount} mistake{item.incorrectCount > 1 ? 's' : ''} in {item.attemptsCount} attempts
-                  </p>
-                </div>
+                  <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <button
+                      onClick={() => handleClear(item.chapterId)}
+                      className="text-2xs text-slate-400 hover:text-emerald-600 font-medium"
+                    >
+                      Mark Mastered
+                    </button>
 
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <button
-                    onClick={() => handleClear(item.id)}
-                    className="text-2xs text-slate-400 hover:text-emerald-600 font-medium"
-                  >
-                    Mark Mastered
-                  </button>
-
-                  <button
-                    onClick={() => onNavigateChapter(item.chapterId)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    Revise Chapter
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    <button
+                      onClick={() => onNavigateChapter(item.chapterId)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Revise Chapter
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

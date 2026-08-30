@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Chapter } from '../../types';
-import { Check, Copy, Printer, CheckCircle2 } from 'lucide-react';
+import { Check, Copy, Printer } from 'lucide-react';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 
 interface AnswersViewProps {
   chapter: Chapter;
@@ -14,9 +15,9 @@ export const AnswersView: React.FC<AnswersViewProps> = ({ chapter }) => {
       .map(
         ex =>
           `Question ${ex.number} (${ex.difficulty}, ${ex.marks} marks):\n` +
-          `Q: ${ex.question}\n` +
-          `Answer: ${ex.answer.finalAnswer}\n` +
-          (ex.answer.fullWorking ? `Working:\n${ex.answer.fullWorking.join('\n')}\n` : '') +
+          `Q: ${sanitizeContent(ex.question)}\n` +
+          `Answer: ${sanitizeContent(ex.answer.finalAnswer)}\n` +
+          (ex.answer.fullWorking ? `Working:\n${ex.answer.fullWorking.map(w => sanitizeContent(w)).join('\n')}\n` : '') +
           `-----------------------------------\n`
       )
       .join('\n');
@@ -82,13 +83,19 @@ export const AnswersView: React.FC<AnswersViewProps> = ({ chapter }) => {
               </span>
             </div>
 
+            {/* Question display */}
+            <div className="mt-3 text-xs text-slate-700 dark:text-slate-300">
+              <span className="font-semibold text-slate-500 dark:text-slate-400">Question: </span>
+              {sanitizeContent(ex.question)}
+            </div>
+
             {/* Final Answer */}
             <div className="mt-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                 Final Answer:
               </span>
               <div className="mt-1 rounded-lg bg-emerald-50/50 p-3 text-xs font-semibold text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-200 font-mono-math">
-                {ex.answer.finalAnswer}
+                {sanitizeContent(ex.answer.finalAnswer)}
               </div>
             </div>
 
@@ -100,9 +107,16 @@ export const AnswersView: React.FC<AnswersViewProps> = ({ chapter }) => {
                 </span>
                 <ul className="mt-1 space-y-1 rounded-lg bg-slate-50 p-3 text-xs text-slate-700 dark:bg-slate-950/60 dark:text-slate-300 font-mono text-[11px]">
                   {ex.answer.fullWorking.map((w, wi) => (
-                    <li key={wi}>• {w}</li>
+                    <li key={wi}>• {sanitizeContent(w)}</li>
                   ))}
                 </ul>
+              </div>
+            )}
+            
+            {ex.answer.scientificReasoning && (
+              <div className="mt-3 text-xs text-slate-600 dark:text-slate-400">
+                <span className="font-semibold text-slate-500">Scientific Reasoning: </span>
+                {sanitizeContent(ex.answer.scientificReasoning)}
               </div>
             )}
           </div>

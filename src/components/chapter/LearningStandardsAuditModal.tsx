@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import { Chapter, LearningStandardCoverage } from '../../types';
+import { Chapter } from '../../types';
 import { 
   CheckCircle2, 
   X, 
   Award, 
-  BookOpen, 
-  FileCheck, 
   Search, 
-  AlertCircle,
-  Layers,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
+import { computeChapterKSSMCoverage } from '../../utils/coverage';
 
 interface LearningStandardsAuditModalProps {
   chapter: Chapter;
@@ -27,15 +24,10 @@ export const LearningStandardsAuditModal: React.FC<LearningStandardsAuditModalPr
 
   if (!isOpen) return null;
 
-  const standards = chapter.learningStandards || [];
-  const totalCount = standards.length;
-  const completeCount = standards.filter(
-    s => s.notesCoverage && s.exerciseCoverage && s.answerCoverage
-  ).length;
+  const coverageResult = computeChapterKSSMCoverage(chapter);
+  const { totalStandards, coveredStandards, coveragePercentage, standardsWithStatus } = coverageResult;
 
-  const coveragePercentage = totalCount > 0 ? Math.round((completeCount / totalCount) * 100) : 100;
-
-  const filteredStandards = standards.filter(
+  const filteredStandards = standardsWithStatus.filter(
     s => s.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
          s.standard.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -88,7 +80,7 @@ export const LearningStandardsAuditModal: React.FC<LearningStandardsAuditModalPr
 
           <div className="flex items-center gap-3 text-xs">
             <span className="text-slate-500 dark:text-slate-400">
-              Audited Standards: <strong>{completeCount} / {totalCount} Completed</strong>
+              Audited Standards: <strong>{coveredStandards} / {totalStandards} Fully Covered</strong>
             </span>
           </div>
         </div>
@@ -113,57 +105,54 @@ export const LearningStandardsAuditModal: React.FC<LearningStandardsAuditModalPr
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                  {filteredStandards.map((std, idx) => {
-                    const isFullyCovered = std.notesCoverage && std.exerciseCoverage && std.answerCoverage;
-                    return (
-                      <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                        <td className="py-2.5 px-3 font-mono font-bold text-blue-600 dark:text-blue-400">
-                          {std.code}
-                        </td>
-                        <td className="py-2.5 px-3 text-slate-800 dark:text-slate-200 leading-snug">
-                          {std.standard}
-                        </td>
-                        <td className="py-2.5 px-2 text-center">
-                          {std.notesCoverage ? (
-                            <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold">
-                              <CheckCircle2 className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <span className="text-slate-300">○</span>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-2 text-center">
-                          {std.exerciseCoverage ? (
-                            <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold">
-                              <CheckCircle2 className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <span className="text-slate-300">○</span>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-2 text-center">
-                          {std.answerCoverage ? (
-                            <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold">
-                              <CheckCircle2 className="h-4 w-4" />
-                            </span>
-                          ) : (
-                            <span className="text-slate-300">○</span>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          {isFullyCovered ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                              ✓ 100%
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                              In Progress
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {filteredStandards.map((std, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                      <td className="py-2.5 px-3 font-mono font-bold text-blue-600 dark:text-blue-400">
+                        {std.code}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-800 dark:text-slate-200 leading-snug">
+                        {std.standard}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        {std.hasNotes ? (
+                          <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold" title="Notes verified">
+                            <CheckCircle2 className="h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 font-bold">✕</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        {std.hasExercise ? (
+                          <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold" title="Exercise present">
+                            <CheckCircle2 className="h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 font-bold">✕</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        {std.hasAnswer ? (
+                          <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-bold" title="Answer verified">
+                            <CheckCircle2 className="h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 font-bold">✕</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        {std.isFullyCovered ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            ✓ Complete
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                            Partial
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

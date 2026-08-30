@@ -361,7 +361,7 @@ export const ExercisesView: React.FC<ExercisesViewProps> = ({ chapter }) => {
                     </span>
                     <p>
                       {ex.hints && ex.hints[0] 
-                        ? ex.hints[0] 
+                        ? sanitizeContent(ex.hints[0]) 
                         : 'Identify the key formula or definition associated with this learning standard. Write down the given values with their proper units first.'}
                     </p>
                   </div>
@@ -376,7 +376,7 @@ export const ExercisesView: React.FC<ExercisesViewProps> = ({ chapter }) => {
                     </span>
                     <p>
                       {ex.hints && ex.hints[1]
-                        ? ex.hints[1]
+                        ? sanitizeContent(ex.hints[1]) 
                         : 'Rearrange the subject of the formula if necessary. Perform the arithmetic carefully step-by-step.'}
                     </p>
                   </div>
@@ -388,7 +388,7 @@ export const ExercisesView: React.FC<ExercisesViewProps> = ({ chapter }) => {
                     <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
                       <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                         <CheckCircle2 className="h-4 w-4" />
-                        Final Answer: {ex.answer.finalAnswer}
+                        Final Answer: {sanitizeContent(ex.answer.finalAnswer)}
                       </span>
                     </div>
 

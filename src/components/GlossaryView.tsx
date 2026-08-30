@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { GlossaryTerm, SubjectType } from '../types';
 import { glossaryTerms } from '../data/glossary';
 import { isBookmarked, toggleBookmark, recordRevisionActivity } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   BookOpen, 
   Search, 
@@ -308,7 +309,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onNavigateChapter, o
                         )}
                       </div>
                       <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        {item.term}
+                        {sanitizeContent(item.term)}
                       </h2>
                     </div>
 
@@ -330,7 +331,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onNavigateChapter, o
                       Definition
                     </h3>
                     <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed font-medium">
-                      {item.simpleDefinition}
+                      {sanitizeContent(item.simpleDefinition)}
                     </p>
                   </div>
 
@@ -339,14 +340,14 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onNavigateChapter, o
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Explanation
                     </h3>
-                    <p>{item.detailedExplanation}</p>
+                    <p>{sanitizeContent(item.detailedExplanation)}</p>
                   </div>
 
                   {/* Formula if present */}
                   {item.formula && (
                     <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono text-blue-700 dark:text-blue-300">
                       <span className="font-sans font-semibold text-slate-500 dark:text-slate-400 block mb-0.5 text-2xs">FORMULA / RULE:</span>
-                      {item.formula}
+                      {sanitizeContent(item.formula)}
                     </div>
                   )}
 
@@ -356,7 +357,7 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onNavigateChapter, o
                       Exam Example:
                     </span>
                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                      {item.example}
+                      {sanitizeContent(item.example)}
                     </p>
                   </div>
 

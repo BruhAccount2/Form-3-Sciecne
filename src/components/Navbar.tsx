@@ -15,7 +15,8 @@ import {
   Eye, 
   ChevronDown,
   Menu,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import { SubjectType, AppView } from '../types';
 
@@ -257,6 +258,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Eye className="w-4 h-4" />
         </button>
 
+        {/* Settings Button */}
+        <button
+          onClick={() => onNavigateView('settings')}
+          className={`p-2 rounded-lg transition-colors ${
+            activeView === 'settings'
+              ? 'bg-blue-50 text-blue-600 dark:bg-slate-800 dark:text-blue-400'
+              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+          title="App & Study Data Settings"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+
         {/* Theme Toggle Button */}
         <button
           id="theme-toggle-btn"
@@ -332,6 +346,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
             >
               Progress & Stats
+            </button>
+            <button
+              onClick={() => { onNavigateView('settings'); setIsMobileMenuOpen(false); }}
+              className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
+            >
+              Settings & Data
             </button>
           </div>
         </div>

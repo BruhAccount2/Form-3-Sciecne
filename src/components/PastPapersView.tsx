@@ -9,6 +9,7 @@ import {
   toggleBookmark,
   recordRevisionActivity 
 } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   FileText, 
   Search, 
@@ -257,7 +258,7 @@ export const PastPapersView: React.FC<PastPapersViewProps> = ({ onNavigateChapte
 
                         {/* Question Text */}
                         <div className="text-sm font-medium text-slate-900 dark:text-slate-100 leading-relaxed pl-8">
-                          {q.question}
+                          {sanitizeContent(q.question)}
                         </div>
 
                         {/* MCQ Options if Section A */}
@@ -265,7 +266,6 @@ export const PastPapersView: React.FC<PastPapersViewProps> = ({ onNavigateChapte
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-8 pt-1">
                             {q.options.map((opt, optIdx) => {
                               const isSelected = userAnswers[q.number] === optIdx;
-                              const isCorrect = q.answer.finalAnswer.includes(opt) || (isSolutionRevealed && opt.startsWith(q.answer.finalAnswer));
 
                               return (
                                 <button
@@ -277,7 +277,7 @@ export const PastPapersView: React.FC<PastPapersViewProps> = ({ onNavigateChapte
                                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300'
                                   }`}
                                 >
-                                  <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                                  <span>{String.fromCharCode(65 + optIdx)}. {sanitizeContent(opt)}</span>
                                   {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
                                 </button>
                               );
@@ -298,7 +298,7 @@ export const PastPapersView: React.FC<PastPapersViewProps> = ({ onNavigateChapte
                           {isSolutionRevealed && (
                             <div className="mt-3 p-4 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-lg border border-emerald-200 dark:border-emerald-800/60 text-xs space-y-2">
                               <div className="font-bold text-emerald-900 dark:text-emerald-200">
-                                Final Answer: {q.answer.finalAnswer}
+                                Final Answer: {sanitizeContent(q.answer.finalAnswer)}
                               </div>
                               <div className="text-slate-700 dark:text-slate-300 space-y-1">
                                 <span className="font-semibold text-2xs uppercase tracking-wider text-slate-500 block">
@@ -307,13 +307,13 @@ export const PastPapersView: React.FC<PastPapersViewProps> = ({ onNavigateChapte
                                 {q.answer.markingScheme.map((scheme, sIdx) => (
                                   <div key={sIdx} className="flex items-start gap-1.5">
                                     <span className="text-emerald-600 font-bold">•</span>
-                                    <span>{scheme}</span>
+                                    <span>{sanitizeContent(scheme)}</span>
                                   </div>
                                 ))}
                               </div>
                               {q.answer.explanation && (
                                 <p className="text-2xs text-slate-600 dark:text-slate-400 italic pt-1">
-                                  Scientific Note: {q.answer.explanation}
+                                  Scientific Note: {sanitizeContent(q.answer.explanation)}
                                 </p>
                               )}
                             </div>

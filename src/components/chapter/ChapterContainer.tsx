@@ -9,6 +9,7 @@ import { AnsweringTechniquesView } from './AnsweringTechniquesView';
 import { SimulationView } from './SimulationView';
 import { AuditView } from './AuditView';
 import { LearningStandardsAuditModal } from './LearningStandardsAuditModal';
+import { ErrorBoundary } from '../ErrorBoundary';
 import { computeChapterKSSMCoverage } from '../../utils/coverage';
 import { 
   getStandardMastery, 
@@ -416,8 +417,8 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
         {/* Tab Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 leading-relaxed text-[#334155] dark:text-slate-300">
           <div className="max-w-4xl mx-auto space-y-6">
-
-            {/* LEARN SECTION RENDERING */}
+            <ErrorBoundary fallbackTitle="Error displaying chapter view">
+              {/* LEARN SECTION RENDERING */}
             {mainSection === 'learn' && (
               <>
                 {learnSubTab === 'notes' && (
@@ -542,6 +543,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
                 )}
               </>
             )}
+            </ErrorBoundary>
 
             {/* Bottom Prev / Next Navigation Footer */}
             <div className="flex items-center justify-between pt-10 mt-12 border-t border-gray-200 dark:border-slate-800 text-xs">

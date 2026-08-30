@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Chapter, MindmapNode } from '../../types';
 import { ChevronRight, ChevronDown, ZoomIn, ZoomOut, RotateCcw, Network, Sparkles } from 'lucide-react';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 
 interface MindmapViewProps {
   chapter: Chapter;
@@ -112,7 +113,7 @@ export const MindmapView: React.FC<MindmapViewProps> = ({ chapter }) => {
                 Chapter {chapter.chapterNumber} Central Theme
               </span>
               <h3 className="text-base sm:text-lg font-extrabold tracking-tight">
-                {chapter.mindmap.title}
+                {sanitizeContent(chapter.mindmap.title)}
               </h3>
             </div>
 
@@ -165,7 +166,7 @@ const MindmapBranch: React.FC<{
               {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </span>
           )}
-          <span>{node.title}</span>
+          <span>{sanitizeContent(node.title)}</span>
           {hasChildren && isCollapsed && (
             <span className="rounded-full bg-blue-200/70 dark:bg-blue-900/80 px-1.5 py-0.2 text-[10px] font-mono text-blue-800 dark:text-blue-300">
               +{node.children!.length}

@@ -51,14 +51,14 @@ export const NotesView: React.FC<NotesViewProps> = ({
         <div className="flex items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[#2563EB] dark:text-blue-400 block mb-1">
-              {chapter.subject === 'science' ? 'Form 3 Science' : 'Form 3 Mathematics'} • {chapter.theme}
+              {chapter.subject === 'science' ? 'Form 3 Science' : 'Form 3 Mathematics'} • {sanitizeContent(chapter.theme)}
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] dark:text-white mb-2">
-              Chapter {chapter.chapterNumber}: {chapter.title}
+              Chapter {chapter.chapterNumber}: {sanitizeContent(chapter.title)}
             </h2>
             <div className="h-1 w-20 bg-[#2563EB] dark:bg-blue-500 rounded-full mb-3"></div>
             <p className="text-sm text-[#334155] dark:text-slate-300 leading-relaxed max-w-3xl">
-              {chapter.summary}
+              {sanitizeContent(chapter.summary)}
             </p>
           </div>
 

@@ -476,3 +476,115 @@ export function recordLastActivity(state: Partial<LastActivityState>): void {
   safeSet(STORAGE_KEYS.LAST_ACTIVITY, updated);
 }
 
+// ==================== GLOBAL DATA MANAGEMENT (EXPORT / IMPORT / RESET) ====================
+
+export interface UserStorageStats {
+  completedChaptersCount: number;
+  bookmarksCount: number;
+  weakAreasCount: number;
+  personalNotesCount: number;
+  examSubmissionsCount: number;
+  incorrectQuestionsCount: number;
+  revisionHistoryCount: number;
+  storageSizeKb: number;
+}
+
+export function getStorageStats(): UserStorageStats {
+  let completedCount = 0;
+  try {
+    const raw = localStorage.getItem('f3_completed_chapters');
+    completedCount = raw ? JSON.parse(raw).length : 0;
+  } catch {
+    completedCount = 0;
+  }
+
+  let totalBytes = 0;
+  if (typeof window !== 'undefined') {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('f3_')) {
+        const val = localStorage.getItem(key) || '';
+        totalBytes += key.length + val.length;
+      }
+    }
+  }
+
+  return {
+    completedChaptersCount: completedCount,
+    bookmarksCount: getBookmarks().length,
+    weakAreasCount: getWeakAreas().length,
+    personalNotesCount: getPersonalNotes().length,
+    examSubmissionsCount: getExamSubmissions().length,
+    incorrectQuestionsCount: getIncorrectQuestions().length,
+    revisionHistoryCount: getRevisionHistory().length,
+    storageSizeKb: Math.round((totalBytes / 1024) * 10) / 10
+  };
+}
+
+export function exportAllUserData(): string {
+  if (typeof window === 'undefined') return '{}';
+  const exportPayload: Record<string, any> = {
+    version: '2.0',
+    exportDate: new Date().toISOString(),
+    completedChapters: safeGet<string[]>('f3_completed_chapters', []),
+    theme: localStorage.getItem('f3_theme') || 'light',
+    fontSize: localStorage.getItem('f3_fontsize') || 'normal'
+  };
+
+  Object.entries(STORAGE_KEYS).forEach(([_, key]) => {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      try {
+        exportPayload[key] = JSON.parse(raw);
+      } catch {
+        exportPayload[key] = raw;
+      }
+    }
+  });
+
+  return JSON.stringify(exportPayload, null, 2);
+}
+
+export function importUserData(jsonString: string): { success: boolean; message: string } {
+  if (typeof window === 'undefined') return { success: false, message: 'Window unavailable' };
+  try {
+    const data = JSON.parse(jsonString);
+    if (typeof data !== 'object' || !data) {
+      return { success: false, message: 'Invalid file format: JSON root must be an object.' };
+    }
+
+    if (data.completedChapters && Array.isArray(data.completedChapters)) {
+      localStorage.setItem('f3_completed_chapters', JSON.stringify(data.completedChapters));
+    }
+    if (data.theme) {
+      localStorage.setItem('f3_theme', data.theme);
+    }
+    if (data.fontSize) {
+      localStorage.setItem('f3_fontsize', data.fontSize);
+    }
+
+    Object.values(STORAGE_KEYS).forEach(key => {
+      if (data[key] !== undefined) {
+        localStorage.setItem(key, JSON.stringify(data[key]));
+      }
+    });
+
+    return { success: true, message: 'Study progress imported successfully!' };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Failed to parse JSON file.' };
+  }
+}
+
+export function clearAllUserData(): void {
+  if (typeof window === 'undefined') return;
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('f3_')) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+}
+
+

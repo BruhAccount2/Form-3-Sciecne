@@ -3,6 +3,7 @@ import { SubjectType, ExamQuestionItem, ExamSubmission } from '../types';
 import { mathChapters } from '../data/math';
 import { scienceChapters } from '../data/science';
 import { saveExamSubmission, recordQuestionAttempt, recordRevisionActivity } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   Timer, 
   Flag, 
@@ -396,7 +397,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
 
                 {/* Question */}
                 <div className="text-base font-semibold text-slate-900 dark:text-white leading-relaxed">
-                  {currentQ.question}
+                  {sanitizeContent(currentQ.question)}
                 </div>
 
                 {/* Radio Options */}
@@ -420,7 +421,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
                           }`}>
                             {String.fromCharCode(65 + optIdx)}
                           </span>
-                          <span>{opt}</span>
+                          <span>{sanitizeContent(opt)}</span>
                         </div>
                         {isSelected && <Check className="w-4 h-4 text-blue-600" />}
                       </button>
@@ -642,7 +643,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
                     </div>
 
                     <div className="text-sm font-semibold text-slate-900 dark:text-white leading-relaxed">
-                      {q.question}
+                      {sanitizeContent(q.question)}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -659,7 +660,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
 
                         return (
                           <div key={optIdx} className={`p-2.5 rounded-lg border text-2xs flex items-center justify-between ${optClasses}`}>
-                            <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                            <span>{String.fromCharCode(65 + optIdx)}. {sanitizeContent(opt)}</span>
                             {isThisCorrect && <Check className="w-3.5 h-3.5 text-emerald-600" />}
                           </div>
                         );
@@ -670,7 +671,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
                       <span className="font-semibold text-slate-900 dark:text-slate-100 block mb-0.5">
                         Solution & Explanation:
                       </span>
-                      {q.explanation}
+                      {sanitizeContent(q.explanation)}
                     </div>
                   </div>
                 );

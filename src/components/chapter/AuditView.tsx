@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Chapter } from '../../types';
-import { Award, CheckCircle2, Search, BookOpen, Layers, Check } from 'lucide-react';
+import { Award, CheckCircle2, Search, Check, X, AlertCircle } from 'lucide-react';
+import { computeChapterKSSMCoverage } from '../../utils/coverage';
 
 interface AuditViewProps {
   chapter: Chapter;
@@ -9,15 +10,10 @@ interface AuditViewProps {
 export const AuditView: React.FC<AuditViewProps> = ({ chapter }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const standards = chapter.learningStandards || [];
-  const totalCount = standards.length;
-  const completeCount = standards.filter(
-    s => s.notesCoverage && s.exerciseCoverage && s.answerCoverage
-  ).length;
+  const coverageResult = computeChapterKSSMCoverage(chapter);
+  const { totalStandards, coveredStandards, coveragePercentage, standardsWithStatus } = coverageResult;
 
-  const coveragePercentage = totalCount > 0 ? Math.round((completeCount / totalCount) * 100) : 100;
-
-  const filteredStandards = standards.filter(
+  const filteredStandards = standardsWithStatus.filter(
     s => s.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
          s.standard.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -45,10 +41,10 @@ export const AuditView: React.FC<AuditViewProps> = ({ chapter }) => {
               {coveragePercentage}%
             </div>
             <div className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
-              KSSM Coverage: 100%
+              KSSM Coverage: {coveragePercentage}%
             </div>
             <span className="text-[10px] text-slate-500 dark:text-slate-400">
-              {completeCount} / {totalCount} Standards Verified
+              {coveredStandards} / {totalStandards} Standards Fully Verified
             </span>
           </div>
         </div>
@@ -91,25 +87,50 @@ export const AuditView: React.FC<AuditViewProps> = ({ chapter }) => {
                   {std.standard}
                 </td>
                 <td className="py-3 px-3 text-center">
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold">
-                    <Check className="h-3.5 w-3.5" />
-                  </span>
+                  {std.hasNotes ? (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold" title="Notes verified">
+                      <Check className="h-3.5 w-3.5" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 mx-auto font-bold" title="No linked note">
+                      <X className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </td>
                 <td className="py-3 px-3 text-center">
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold">
-                    <Check className="h-3.5 w-3.5" />
-                  </span>
+                  {std.hasExercise ? (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold" title="Aligned exercise present">
+                      <Check className="h-3.5 w-3.5" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 mx-auto font-bold" title="No aligned exercise">
+                      <X className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </td>
                 <td className="py-3 px-3 text-center">
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold">
-                    <Check className="h-3.5 w-3.5" />
-                  </span>
+                  {std.hasAnswer ? (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 mx-auto font-bold" title="Step-by-step answer verified">
+                      <Check className="h-3.5 w-3.5" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 mx-auto font-bold" title="No verified answer">
+                      <X className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </td>
                 <td className="py-3 px-4 text-center">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    <CheckCircle2 className="h-3 w-3" />
-                    <span>Complete</span>
-                  </span>
+                  {std.isFullyCovered ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Complete</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Partial</span>
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

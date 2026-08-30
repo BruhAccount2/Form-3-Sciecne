@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { FormulaItem, SubjectType } from '../types';
 import { formulaeList } from '../data/formulae';
-import { isBookmarked, toggleBookmark, recordRevisionActivity } from '../utils/storage';
+import { isBookmarked, toggleBookmark } from '../utils/storage';
+import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   Calculator, 
   Search, 
@@ -160,7 +161,7 @@ export const FormulaSheetView: React.FC<FormulaSheetViewProps> = ({ onNavigateCh
                       </span>
                     </div>
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      {item.title}
+                      {sanitizeContent(item.title)}
                     </h2>
                   </div>
 
@@ -189,11 +190,11 @@ export const FormulaSheetView: React.FC<FormulaSheetViewProps> = ({ onNavigateCh
                 {/* Prominent Formula Display Box */}
                 <div className="my-3 p-4 bg-blue-50/60 dark:bg-slate-950 rounded-lg border border-blue-200/80 dark:border-blue-900/50">
                   <div className="font-mono text-base font-bold text-blue-900 dark:text-blue-200 select-all">
-                    {item.formula}
+                    {sanitizeContent(item.formula)}
                   </div>
                   {item.formulaInWords && (
                     <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 italic">
-                      "{item.formulaInWords}"
+                      "{sanitizeContent(item.formulaInWords)}"
                     </p>
                   )}
                 </div>
@@ -207,14 +208,14 @@ export const FormulaSheetView: React.FC<FormulaSheetViewProps> = ({ onNavigateCh
                     {item.meaningOfSymbols.map((sym, sIdx) => (
                       <div key={sIdx} className="flex items-baseline justify-between gap-2">
                         <span className="font-mono font-bold text-slate-900 dark:text-slate-100 shrink-0">
-                          {sym.symbol}
+                          {sanitizeContent(sym.symbol)}
                         </span>
                         <span className="text-slate-600 dark:text-slate-300 flex-1">
-                          {sym.meaning}
+                          {sanitizeContent(sym.meaning)}
                         </span>
                         {sym.unit && (
                           <span className="text-2xs text-slate-400 dark:text-slate-500 font-mono shrink-0">
-                            [{sym.unit}]
+                            [{sanitizeContent(sym.unit)}]
                           </span>
                         )}
                       </div>
@@ -229,15 +230,15 @@ export const FormulaSheetView: React.FC<FormulaSheetViewProps> = ({ onNavigateCh
                     Worked Exam Question:
                   </div>
                   <p className="text-slate-700 dark:text-slate-300 mb-2 font-medium">
-                    {item.example.question}
+                    {sanitizeContent(item.example.question)}
                   </p>
                   <div className="space-y-1 text-slate-600 dark:text-slate-400 pl-2 border-l-2 border-blue-400 dark:border-blue-600">
                     {item.example.stepByStepCalculation.map((step, stIdx) => (
-                      <div key={stIdx}>{step}</div>
+                      <div key={stIdx}>{sanitizeContent(step)}</div>
                     ))}
                   </div>
                   <div className="mt-2 font-mono font-bold text-emerald-700 dark:text-emerald-400 text-xs">
-                    Answer = {item.example.finalAnswerWithUnit}
+                    Answer = {sanitizeContent(item.example.finalAnswerWithUnit)}
                   </div>
                 </div>
               </div>

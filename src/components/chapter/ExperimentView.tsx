@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Chapter, Experiment } from '../../types';
 import { FlaskConical, ShieldAlert, CheckCircle2, FileText, AlertTriangle, Eye, Layers } from 'lucide-react';
+import { sanitizeContent } from '../../utils/symbolSanitizer';
 
 interface ExperimentViewProps {
   chapter: Chapter;
@@ -67,7 +68,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
             <span>KSSM Form 3 Practical Science Lab Report</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {exp.title}
+            {sanitizeContent(exp.title)}
           </h2>
         </div>
 
@@ -78,7 +79,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
               1. Aim of Experiment:
             </span>
             <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-              {exp.aim}
+              {sanitizeContent(exp.aim)}
             </p>
           </div>
 
@@ -87,7 +88,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
               2. Scientific Hypothesis:
             </span>
             <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-              {exp.hypothesis}
+              {sanitizeContent(exp.hypothesis)}
             </p>
           </div>
         </div>
@@ -104,7 +105,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   Manipulated Variable (MV)
                 </span>
                 <p className="text-xs text-slate-700 dark:text-slate-300">
-                  {exp.variables.manipulated}
+                  {sanitizeContent(exp.variables.manipulated)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
@@ -112,7 +113,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   Responding Variable (RV)
                 </span>
                 <p className="text-xs text-slate-700 dark:text-slate-300">
-                  {exp.variables.responding}
+                  {sanitizeContent(exp.variables.responding)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
@@ -120,7 +121,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   Constant Variable (CV)
                 </span>
                 <p className="text-xs text-slate-700 dark:text-slate-300">
-                  {exp.variables.constant}
+                  {sanitizeContent(exp.variables.constant)}
                 </p>
               </div>
             </div>
@@ -139,7 +140,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   key={i}
                   className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
                 >
-                  {item}
+                  {sanitizeContent(item)}
                 </span>
               ))}
             </div>
@@ -158,7 +159,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                     {sIdx + 1}
                   </span>
-                  <span className="leading-relaxed">{step}</span>
+                  <span className="leading-relaxed">{sanitizeContent(step)}</span>
                 </li>
               ))}
             </ol>
@@ -178,7 +179,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                   <tr>
                     {observationData.headers.map((h, hi) => (
                       <th key={hi} className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
-                        {h}
+                        {sanitizeContent(h)}
                       </th>
                     ))}
                   </tr>
@@ -188,7 +189,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                     <tr key={ri} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
                       {row.map((cell, ci) => (
                         <td key={ci} className="px-4 py-2.5">
-                          {cell}
+                          {sanitizeContent(cell)}
                         </td>
                       ))}
                     </tr>
@@ -208,7 +209,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
                 <span>7. Scientific Conclusion:</span>
               </div>
               <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-                {exp.conclusion}
+                {sanitizeContent(exp.conclusion)}
               </p>
             </div>
           )}
@@ -221,7 +222,7 @@ export const ExperimentView: React.FC<ExperimentViewProps> = ({ chapter }) => {
               </div>
               <ul className="space-y-1 text-xs text-slate-700 dark:text-slate-300">
                 {precautionsList.map((prec, pi) => (
-                  <li key={pi}>• {prec}</li>
+                  <li key={pi}>• {sanitizeContent(prec)}</li>
                 ))}
               </ul>
             </div>

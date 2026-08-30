@@ -18,8 +18,10 @@ import { ExamModeView } from './components/ExamModeView';
 import { BookmarksView } from './components/BookmarksView';
 import { WeakAreasView } from './components/WeakAreasView';
 import { ProgressView } from './components/ProgressView';
+import { SettingsView } from './components/SettingsView';
 import { AccessibilityModal } from './components/AccessibilityModal';
 import { PrintNotesModal } from './components/PrintNotesModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   // Theme state
@@ -170,86 +172,100 @@ export default function App() {
 
       {/* Main View Router */}
       <main className="flex-1">
-        {activeChapter ? (
-          <ChapterContainer
-            chapter={activeChapter}
-            isCompleted={completedChapterIds.includes(activeChapter.id)}
-            onToggleComplete={() => toggleCompleteChapter(activeChapter.id)}
-            onSelectChapter={handleSelectChapter}
-            allSubjectChapters={currentSubjectChapters}
-            onBackToSubject={() => setActiveChapterId(null)}
-            onOpenPrintView={(ch) => setPrintChapter(ch)}
-          />
-        ) : activeSubject ? (
-          <SubjectView
-            subject={activeSubject}
-            onSelectChapter={handleSelectChapter}
-            completedChapterIds={completedChapterIds}
-            onToggleCompleteChapter={toggleCompleteChapter}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'glossary' ? (
-          <GlossaryView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'formula_sheet' ? (
-          <FormulaSheetView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'past_papers' ? (
-          <PastPapersView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'quick_revision' ? (
-          <QuickRevisionView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'daily_revision' ? (
-          <DailyRevisionView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'random_practice' ? (
-          <RandomPracticeView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'exam' ? (
-          <ExamModeView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'bookmarks' ? (
-          <BookmarksView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateGlossary={() => handleNavigateView('glossary')}
-            onNavigatePastPapers={() => handleNavigateView('past_papers')}
-            onNavigateFormulae={() => handleNavigateView('formula_sheet')}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'weak_areas' ? (
-          <WeakAreasView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : activeView === 'progress' ? (
-          <ProgressView
-            onNavigateChapter={handleNavigateChapterById}
-            onNavigateHome={handleNavigateHome}
-          />
-        ) : (
-          <HomePage
-            onSelectSubject={handleSelectSubject}
-            onSelectChapter={handleSelectChapter}
-            onNavigateView={handleNavigateView}
-            completedChapterIds={completedChapterIds}
-            onOpenSearch={() => setIsSearchOpen(true)}
-          />
-        )}
+        <ErrorBoundary onNavigateHome={handleNavigateHome}>
+          {activeChapter ? (
+            <ErrorBoundary fallbackTitle="Error loading chapter content" onNavigateHome={handleNavigateHome}>
+              <ChapterContainer
+                chapter={activeChapter}
+                isCompleted={completedChapterIds.includes(activeChapter.id)}
+                onToggleComplete={() => toggleCompleteChapter(activeChapter.id)}
+                onSelectChapter={handleSelectChapter}
+                allSubjectChapters={currentSubjectChapters}
+                onBackToSubject={() => setActiveChapterId(null)}
+                onOpenPrintView={(ch) => setPrintChapter(ch)}
+              />
+            </ErrorBoundary>
+          ) : activeSubject ? (
+            <SubjectView
+              subject={activeSubject}
+              onSelectChapter={handleSelectChapter}
+              completedChapterIds={completedChapterIds}
+              onToggleCompleteChapter={toggleCompleteChapter}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'glossary' ? (
+            <GlossaryView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'formula_sheet' ? (
+            <FormulaSheetView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'past_papers' ? (
+            <PastPapersView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'quick_revision' ? (
+            <QuickRevisionView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'daily_revision' ? (
+            <DailyRevisionView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'random_practice' ? (
+            <RandomPracticeView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'exam' || activeView === 'exam_mode' ? (
+            <ErrorBoundary fallbackTitle="Error loading exam mode" onNavigateHome={handleNavigateHome}>
+              <ExamModeView
+                onNavigateChapter={handleNavigateChapterById}
+                onNavigateHome={handleNavigateHome}
+              />
+            </ErrorBoundary>
+          ) : activeView === 'bookmarks' ? (
+            <BookmarksView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateGlossary={() => handleNavigateView('glossary')}
+              onNavigatePastPapers={() => handleNavigateView('past_papers')}
+              onNavigateFormulae={() => handleNavigateView('formula_sheet')}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'weak_areas' ? (
+            <WeakAreasView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'progress' ? (
+            <ProgressView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'settings' ? (
+            <SettingsView
+              darkMode={darkMode}
+              setDarkMode={setDarkMode}
+              fontSize={fontSize}
+              setFontSize={setFontSize}
+              onNavigateHome={handleNavigateHome}
+            />
+          ) : (
+            <HomePage
+              onSelectSubject={handleSelectSubject}
+              onSelectChapter={handleSelectChapter}
+              onNavigateView={handleNavigateView}
+              completedChapterIds={completedChapterIds}
+              onOpenSearch={() => setIsSearchOpen(true)}
+            />
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Global Footer */}
