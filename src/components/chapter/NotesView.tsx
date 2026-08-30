@@ -8,6 +8,7 @@ import {
   ArrowRight, 
   Calculator, 
   CheckCircle2, 
+  XCircle,
   ChevronDown, 
   BookOpen, 
   Play, 
@@ -31,6 +32,9 @@ import {
   BookCheck,
   FastForward
 } from 'lucide-react';
+import { McqFeedback } from '../McqFeedback';
+import { ImageViewerModal } from '../ImageViewerModal';
+import { ChapterEndTest } from './ChapterEndTest';
 
 interface NotesViewProps {
   chapter: Chapter;
@@ -43,6 +47,10 @@ export const NotesView: React.FC<NotesViewProps> = ({
   isCompleted,
   onToggleComplete
 }) => {
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-10 animate-fadeIn">
       
@@ -98,6 +106,14 @@ export const NotesView: React.FC<NotesViewProps> = ({
           <NoteSectionCard key={idx} section={section} />
         ))}
       </div>
+
+      {/* Chapter-End 15-Question Assessment Test */}
+      <ChapterEndTest 
+        chapter={chapter}
+        isCompleted={isCompleted}
+        onToggleComplete={onToggleComplete}
+        onScrollToTop={handleScrollToTop}
+      />
 
       {/* Completion Banner */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/60">
@@ -497,6 +513,7 @@ const FormattedContent: React.FC<{ content: string }> = ({ content }) => {
 const InteractiveWidget: React.FC<{ element: InteractiveElement }> = ({ element }) => {
   const [revealed, setRevealed] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   // Calculator state
@@ -535,50 +552,109 @@ const InteractiveWidget: React.FC<{ element: InteractiveElement }> = ({ element 
   }
 
   if (element.type === 'quiz') {
+    const correctOptIdx = element.options?.findIndex(o => o.isCorrect) ?? -1;
+    const correctOpt = correctOptIdx >= 0 && element.options ? element.options[correctOptIdx] : null;
+    const chosenOpt = selectedOption !== null && element.options ? element.options[selectedOption] : null;
+
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2 mb-1.5">
-          <HelpCircle className="h-4 w-4 text-[#2563EB] dark:text-blue-400" />
-          <span className="text-xs font-bold text-[#0F172A] dark:text-white">
-            {element.title}
+      <div className="rounded-xl border border-blue-200/80 bg-white dark:bg-slate-900 dark:border-slate-800 p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+              <HelpCircle className="h-3.5 w-3.5" />
+            </span>
+            <span className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
+              {element.title}
+            </span>
+          </div>
+          <span className="text-2xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded">
+            Interactive Checkpoint
           </span>
         </div>
-        <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mb-3">
+
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
           {element.prompt}
         </p>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {element.options?.map((opt, oIdx) => {
             const isChosen = selectedOption === oIdx;
+            const letter = String.fromCharCode(65 + oIdx);
+
+            let classes = 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50';
+
+            if (!isSubmitted) {
+              if (isChosen) {
+                classes = 'border-blue-600 bg-blue-50/80 text-blue-950 dark:bg-blue-950/60 dark:text-blue-100 ring-2 ring-blue-500 font-semibold';
+              }
+            } else {
+              if (opt.isCorrect) {
+                classes = 'border-emerald-500 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-200 font-bold ring-1 ring-emerald-500';
+              } else if (isChosen) {
+                classes = 'border-rose-500 bg-rose-50 text-rose-950 dark:bg-rose-950/60 dark:text-rose-200 ring-1 ring-rose-500';
+              } else {
+                classes = 'opacity-40 border-slate-200 dark:border-slate-800 text-slate-500';
+              }
+            }
+
             return (
               <button
                 key={oIdx}
+                disabled={isSubmitted}
                 onClick={() => setSelectedOption(oIdx)}
-                className={`w-full text-left p-2.5 rounded-md border text-xs transition ${
-                  isChosen
-                    ? opt.isCorrect
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:border-emerald-600 dark:bg-emerald-950 dark:text-emerald-200 font-semibold'
-                      : 'border-rose-500 bg-rose-50 text-rose-900 dark:border-rose-600 dark:bg-rose-950 dark:text-rose-200'
-                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300'
-                }`}
+                className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${classes}`}
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start gap-2.5">
+                  <span className="font-mono font-bold text-xs shrink-0 mt-0.5">
+                    {letter}.
+                  </span>
                   <span>{opt.text}</span>
-                  {isChosen && (
-                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded">
-                      {opt.isCorrect ? '✓ Correct' : '✗ Incorrect'}
-                    </span>
-                  )}
                 </div>
-                {isChosen && (
-                  <p className="mt-1.5 text-[11px] font-normal opacity-90">
-                    {opt.explanation}
-                  </p>
-                )}
+                {isSubmitted && opt.isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 ml-2" />}
+                {isSubmitted && isChosen && !opt.isCorrect && <XCircle className="w-4 h-4 text-rose-600 shrink-0 ml-2" />}
               </button>
             );
           })}
         </div>
+
+        {/* Action button */}
+        {!isSubmitted ? (
+          <div className="pt-2 flex justify-end">
+            <button
+              disabled={selectedOption === null}
+              onClick={() => setIsSubmitted(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold disabled:opacity-40 flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <span>Submit Answer</span>
+              <Check className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3 pt-2">
+            {correctOpt && chosenOpt && (
+              <McqFeedback
+                isCorrect={Boolean(chosenOpt.isCorrect)}
+                selectedOptionLetter={String.fromCharCode(65 + (selectedOption ?? 0))}
+                selectedOptionText={chosenOpt.text}
+                correctOptionLetter={String.fromCharCode(65 + correctOptIdx)}
+                correctOptionText={correctOpt.text}
+                explanation={chosenOpt.explanation || correctOpt.explanation || 'Review the chapter notes above to reinforce this concept.'}
+              />
+            )}
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setSelectedOption(null);
+                  setIsSubmitted(false);
+                }}
+                className="px-3 py-1.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-2xs font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Try Again</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -710,6 +786,7 @@ const DiagramWidget: React.FC<{
   const [activeLabel, setActiveLabel] = useState<DiagramLabel | null>(
     data.labels && data.labels.length > 0 ? data.labels[0] : null
   );
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   return (
     <div className="rounded-xl border border-indigo-100 bg-white p-4 dark:border-indigo-900/60 dark:bg-slate-900 shadow-sm">
@@ -729,6 +806,16 @@ const DiagramWidget: React.FC<{
             </p>
           )}
         </div>
+
+        {data.svgContent && (
+          <button
+            onClick={() => setIsViewerOpen(true)}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition cursor-pointer"
+            title="Inspect Diagram Fullscreen"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {prompt && (
@@ -741,11 +828,19 @@ const DiagramWidget: React.FC<{
       {data.svgContent && (
         <div className="relative overflow-hidden rounded-lg border border-gray-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 p-3 flex flex-col items-center justify-center min-h-[220px]">
           <div 
-            className="w-full flex justify-center items-center select-none"
-            dangerouslySetInnerHTML={{ __html: data.svgContent }}
+            onClick={() => setIsViewerOpen(true)}
+            className="w-full flex justify-center items-center select-none cursor-pointer hover:opacity-95 transition"
+            dangerouslySetInnerHTML={{ __html: data.svgContent }} 
           />
+          <button
+            onClick={() => setIsViewerOpen(true)}
+            className="mt-2 text-2xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <Maximize2 className="w-3 h-3" />
+            Click diagram to expand & zoom
+          </button>
           {data.caption && (
-            <span className="text-[11px] text-gray-400 dark:text-slate-500 mt-2 text-center italic">
+            <span className="text-[11px] text-gray-400 dark:text-slate-500 mt-1 text-center italic">
               {data.caption}
             </span>
           )}
@@ -800,6 +895,17 @@ const DiagramWidget: React.FC<{
             </div>
           )}
         </div>
+      )}
+
+      {/* Modal Inspector */}
+      {data.svgContent && (
+        <ImageViewerModal
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          title={title}
+          subtitle={description || 'Detailed Diagram Inspection'}
+          svgContent={data.svgContent}
+        />
       )}
     </div>
   );
@@ -891,22 +997,35 @@ const InteractiveSimulationWidget: React.FC<{
   );
 };
 
-
 const ImageWidget: React.FC<{
   title: string;
   description?: string;
   prompt?: string;
   idata: NonNullable<InteractiveElement['imageData']>;
 }> = ({ title, description, prompt, idata }) => {
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+
   return (
     <div className="rounded-xl border border-sky-100 bg-white p-4 dark:border-sky-900/50 dark:bg-slate-900 shadow-sm">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="flex h-5 w-5 items-center justify-center rounded bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400">
-          <ImageIcon className="h-3.5 w-3.5" />
-        </span>
-        <span className="text-xs font-bold text-[#0F172A] dark:text-white">
-          {title}
-        </span>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2">
+          <span className="flex h-5 w-5 items-center justify-center rounded bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400">
+            <ImageIcon className="h-3.5 w-3.5" />
+          </span>
+          <span className="text-xs font-bold text-[#0F172A] dark:text-white">
+            {title}
+          </span>
+        </div>
+
+        {(idata.svgContent || idata.url) && (
+          <button
+            onClick={() => setIsViewerOpen(true)}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-slate-800 transition cursor-pointer"
+            title="Inspect Image Fullscreen"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {description && (
@@ -917,11 +1036,20 @@ const ImageWidget: React.FC<{
 
       {idata.svgContent ? (
         <div 
-          className="rounded-lg border border-gray-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 p-3 flex justify-center"
-          dangerouslySetInnerHTML={{ __html: idata.svgContent }}
-        />
+          onClick={() => setIsViewerOpen(true)}
+          className="rounded-lg border border-gray-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 p-3 flex flex-col items-center justify-center cursor-pointer hover:opacity-95 transition"
+        >
+          <div dangerouslySetInnerHTML={{ __html: idata.svgContent }} />
+          <span className="mt-2 text-2xs font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
+            <Maximize2 className="w-3 h-3" />
+            Click diagram to expand & zoom
+          </span>
+        </div>
       ) : idata.url ? (
-        <div className="rounded-lg overflow-hidden border border-gray-100 dark:border-slate-800">
+        <div 
+          onClick={() => setIsViewerOpen(true)}
+          className="rounded-lg overflow-hidden border border-gray-100 dark:border-slate-800 cursor-pointer"
+        >
           <img src={idata.url} alt={idata.alt || title} className="w-full object-cover max-h-80" />
         </div>
       ) : null}
@@ -936,6 +1064,18 @@ const ImageWidget: React.FC<{
         <div className="mt-3 p-3 rounded-lg border border-sky-200 bg-sky-50/60 dark:border-sky-900/50 dark:bg-sky-950/20 text-xs text-sky-950 dark:text-sky-200">
           {idata.details}
         </div>
+      )}
+
+      {/* Modal Inspector */}
+      {(idata.svgContent || idata.url) && (
+        <ImageViewerModal
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          title={title}
+          subtitle={description || 'Detailed Visual Inspection'}
+          svgContent={idata.svgContent}
+          imageSrc={idata.url}
+        />
       )}
     </div>
   );

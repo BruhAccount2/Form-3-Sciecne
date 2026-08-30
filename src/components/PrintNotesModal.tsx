@@ -81,34 +81,34 @@ export const PrintNotesModal: React.FC<PrintNotesModalProps> = ({
           )}
 
           {/* Structured Note Sections */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {chapter.notes.map((section, idx) => (
-              <div key={idx} className="space-y-3 border-b border-slate-200 pb-6 last:border-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-bold text-sm bg-slate-200 px-2 py-0.5 rounded text-slate-800">
+              <div key={idx} className="space-y-4 border-b border-slate-300 pb-8 last:border-0">
+                <div className="flex items-baseline gap-3">
+                  <span className="font-bold text-base bg-slate-200 px-2.5 py-1 rounded text-slate-900">
                     {chapter.chapterNumber}.{idx + 1}
                   </span>
-                  <h2 className="text-base font-bold text-slate-900">
+                  <h2 className="text-xl font-bold text-slate-900">
                     {section.title}
                   </h2>
                 </div>
 
                 <div 
-                  className="text-xs leading-relaxed text-slate-800 space-y-2"
+                  className="text-[18px] print:text-[18px] leading-relaxed text-slate-900 space-y-3"
                   dangerouslySetInnerHTML={{ __html: sanitizeContent(section.content) }}
                 />
 
                 {/* Key Formulas */}
                 {section.keyFormulas && section.keyFormulas.length > 0 && (
-                  <div className="space-y-2 pt-1">
+                  <div className="space-y-3 pt-2">
                     {section.keyFormulas.map((kf, kfIdx) => (
-                      <div key={kfIdx} className="p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs space-y-1.5">
-                        <span className="font-bold text-slate-900 block">{kf.name}</span>
-                        <div className="font-semibold text-blue-900 bg-blue-50 p-2 rounded border border-blue-100" dangerouslySetInnerHTML={{ __html: sanitizeContent(kf.formulaInWords) }} />
+                      <div key={kfIdx} className="p-4 bg-slate-50 border border-slate-300 rounded-xl text-[18px] print:text-[18px] space-y-2">
+                        <span className="font-bold text-slate-900 block text-lg">{kf.name}</span>
+                        <div className="font-semibold text-blue-950 bg-blue-50 p-3 rounded-lg border border-blue-200 text-[18px]" dangerouslySetInnerHTML={{ __html: sanitizeContent(kf.formulaInWords) }} />
                         {kf.howToUse && kf.howToUse.length > 0 && (
-                          <div className="text-slate-700 space-y-0.5">
-                            <span className="font-semibold text-slate-800 text-[11px]">Steps / Method:</span>
-                            <ol className="list-decimal list-inside pl-1 space-y-0.5">
+                          <div className="text-slate-800 space-y-1 pt-1">
+                            <span className="font-semibold text-slate-900 text-[16px] block">Steps / Method:</span>
+                            <ol className="list-decimal list-inside pl-2 space-y-1 text-[17px]">
                               {kf.howToUse.map((step, stIdx) => (
                                 <li key={stIdx} dangerouslySetInnerHTML={{ __html: sanitizeContent(step) }} />
                               ))}
@@ -116,7 +116,7 @@ export const PrintNotesModal: React.FC<PrintNotesModalProps> = ({
                           </div>
                         )}
                         {kf.wordExample && (
-                          <div className="text-slate-700 bg-white p-2 rounded border border-slate-200 text-[11px]">
+                          <div className="text-slate-800 bg-white p-3 rounded-lg border border-slate-200 text-[17px]">
                             <span className="font-semibold text-slate-900">Example: </span>
                             <span dangerouslySetInnerHTML={{ __html: sanitizeContent(kf.wordExample) }} />
                           </div>
@@ -128,11 +128,11 @@ export const PrintNotesModal: React.FC<PrintNotesModalProps> = ({
 
                 {/* Definitions */}
                 {section.definitions && section.definitions.length > 0 && (
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5">
-                    <span className="font-bold text-slate-900 block">Key Definitions:</span>
-                    <div className="grid grid-cols-1 gap-1.5">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-300 text-[18px] print:text-[18px] space-y-2">
+                    <span className="font-bold text-slate-900 block text-lg">Key Definitions:</span>
+                    <div className="grid grid-cols-1 gap-2">
                       {section.definitions.map((def, dIdx) => (
-                        <div key={dIdx} className="text-slate-700">
+                        <div key={dIdx} className="text-slate-800 text-[17px]">
                           <strong className="text-slate-900">{def.term}: </strong>
                           <span dangerouslySetInnerHTML={{ __html: sanitizeContent(def.definition) }} />
                         </div>

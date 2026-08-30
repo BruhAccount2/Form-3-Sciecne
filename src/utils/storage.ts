@@ -21,7 +21,10 @@ const STORAGE_KEYS = {
   STANDARD_MASTERY: 'f3_standard_mastery_v2',
   PERSONAL_NOTES: 'f3_personal_notes_v2',
   INCORRECT_QUESTIONS: 'f3_incorrect_questions_v2',
-  LAST_ACTIVITY: 'f3_last_activity_v2'
+  LAST_ACTIVITY: 'f3_last_activity_v2',
+  STREAK_DATA: 'f3_streak_data_v2',
+  POINTS_DATA: 'f3_points_data_v2',
+  CHAPTER_QUIZ_SCORES: 'f3_chapter_quiz_scores_v2'
 };
 
 // Safe JSON parse helper
@@ -586,5 +589,295 @@ export function clearAllUserData(): void {
   }
   keysToRemove.forEach(k => localStorage.removeItem(k));
 }
+
+// ==================== STREAK TRACKING (A4) ====================
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDateStr: string; // YYYY-MM-DD
+  totalDaysActive: number;
+  activityDates: string[]; // List of YYYY-MM-DD
+}
+
+function getTodayDateStr(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getYesterdayDateStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function getStreakData(): StreakData {
+  // Check legacy localStorage 'f3_daily_streak' for smooth upgrade
+  const legacyStreak = safeGet<number | null>('f3_daily_streak', null);
+  const fallback: StreakData = {
+    currentStreak: legacyStreak || 1,
+    longestStreak: legacyStreak || 1,
+    lastActiveDateStr: getTodayDateStr(),
+    totalDaysActive: legacyStreak || 1,
+    activityDates: [getTodayDateStr()]
+  };
+
+  const stored = safeGet<StreakData | null>(STORAGE_KEYS.STREAK_DATA, null);
+  if (!stored) {
+    safeSet(STORAGE_KEYS.STREAK_DATA, fallback);
+    return fallback;
+  }
+  return stored;
+}
+
+export function recordStreakActivity(): StreakData {
+  const current = getStreakData();
+  const todayStr = getTodayDateStr();
+  const yesterdayStr = getYesterdayDateStr();
+
+  if (current.lastActiveDateStr === todayStr) {
+    // Already recorded activity today
+    return current;
+  }
+
+  let newStreak = current.currentStreak;
+  if (current.lastActiveDateStr === yesterdayStr) {
+    // Consecutive day
+    newStreak += 1;
+  } else {
+    // Missed at least one day, reset to 1
+    newStreak = 1;
+  }
+
+  const updatedActivityDates = current.activityDates.includes(todayStr)
+    ? current.activityDates
+    : [...current.activityDates, todayStr].slice(-60);
+
+  const updated: StreakData = {
+    currentStreak: newStreak,
+    longestStreak: Math.max(current.longestStreak, newStreak),
+    lastActiveDateStr: todayStr,
+    totalDaysActive: current.totalDaysActive + 1,
+    activityDates: updatedActivityDates
+  };
+
+  safeSet(STORAGE_KEYS.STREAK_DATA, updated);
+  // Keep legacy key in sync for backwards compatibility
+  safeSet('f3_daily_streak', newStreak);
+
+  // Award daily streak points
+  addPoints(25, `Daily streak milestone (${newStreak} days active)`);
+  return updated;
+}
+
+// ==================== POINTS & LOCAL STATS (Part D) ====================
+
+export interface PointHistoryItem {
+  id: string;
+  points: number;
+  reason: string;
+  timestamp: number;
+}
+
+export interface UserPointsData {
+  totalPoints: number;
+  history: PointHistoryItem[];
+}
+
+export function getUserPointsData(): UserPointsData {
+  return safeGet<UserPointsData>(STORAGE_KEYS.POINTS_DATA, {
+    totalPoints: 120, // Starting bonus for new students
+    history: [
+      {
+        id: 'init_bonus',
+        points: 120,
+        reason: 'Welcome to Form 3 Revision! Starter Study Bonus',
+        timestamp: Date.now()
+      }
+    ]
+  });
+}
+
+export function getUserPoints(): number {
+  return getUserPointsData().totalPoints;
+}
+
+export function addPoints(amount: number, reason: string): number {
+  const current = getUserPointsData();
+  const newTotal = Math.max(0, current.totalPoints + amount);
+  const newEntry: PointHistoryItem = {
+    id: `pt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    points: amount,
+    reason,
+    timestamp: Date.now()
+  };
+
+  const updated: UserPointsData = {
+    totalPoints: newTotal,
+    history: [newEntry, ...current.history].slice(0, 50)
+  };
+
+  safeSet(STORAGE_KEYS.POINTS_DATA, updated);
+  return newTotal;
+}
+
+export interface RankTier {
+  title: string;
+  minPoints: number;
+  badge: string;
+  description: string;
+}
+
+export const RANK_TIERS: RankTier[] = [
+  { title: 'Novice Scholar', minPoints: 0, badge: '🌱', description: 'Beginning the Form 3 journey.' },
+  { title: 'Apprentice Learner', minPoints: 250, badge: '📘', description: 'Consistently reviewing core concepts.' },
+  { title: 'Form 3 Achiever', minPoints: 600, badge: '⚡', description: 'Demonstrating solid syllabus grasp.' },
+  { title: 'Honor Student', minPoints: 1200, badge: '🌟', description: 'Mastering challenging multi-step questions.' },
+  { title: 'Distinction Master', minPoints: 2000, badge: '🏆', description: 'Exemplary performance across Math & Science.' },
+  { title: 'Grandmaster Scholar', minPoints: 3200, badge: '👑', description: 'Top-tier revision mastery in all 19 chapters.' }
+];
+
+export function getUserRank(points: number): { current: RankTier; next: RankTier | null; progress: number } {
+  let current = RANK_TIERS[0];
+  let next: RankTier | null = RANK_TIERS[1] || null;
+
+  for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
+    if (points >= RANK_TIERS[i].minPoints) {
+      current = RANK_TIERS[i];
+      next = RANK_TIERS[i + 1] || null;
+      break;
+    }
+  }
+
+  let progress = 100;
+  if (next) {
+    const range = next.minPoints - current.minPoints;
+    const gained = points - current.minPoints;
+    progress = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
+  }
+
+  return { current, next, progress };
+}
+
+// ==================== CHAPTER QUIZ & COMPLETION MIGRATION (A3, Part B) ====================
+
+export interface ChapterQuizRecord {
+  chapterId: string;
+  score: number;
+  total: number;
+  percentage: number;
+  passed: boolean; // score >= 10 out of 15 (Chapter Complete threshold)
+  completedAt: number;
+  attemptsCount: number;
+  grade?: 'FAIL' | 'PASS' | 'GOOD' | 'VERY GOOD';
+}
+
+export function getChapterQuizGrade(score: number, total = 15): {
+  grade: 'FAIL' | 'PASS' | 'GOOD' | 'VERY GOOD';
+  message: string;
+  isComplete: boolean;
+  colorClass: string;
+} {
+  if (score === 15) {
+    return {
+      grade: 'VERY GOOD',
+      message: 'Excellent! You mastered this chapter.',
+      isComplete: true,
+      colorClass: 'emerald'
+    };
+  }
+  if (score >= 11 && score <= 14) {
+    return {
+      grade: 'GOOD',
+      message: "Good! Review the important points you forgot and you're ready to move on.",
+      isComplete: true,
+      colorClass: 'blue'
+    };
+  }
+  if (score >= 5 && score <= 10) {
+    const isComplete = score >= 10;
+    return {
+      grade: 'PASS',
+      message: isComplete
+        ? "You passed, but you should review the points you still don't know."
+        : "You scored within the pass range, but you need at least 10/15 to mark the chapter complete. Review the points you missed and try again.",
+      isComplete,
+      colorClass: isComplete ? 'indigo' : 'amber'
+    };
+  }
+  return {
+    grade: 'FAIL',
+    message: 'You need to revise this chapter again.',
+    isComplete: false,
+    colorClass: 'rose'
+  };
+}
+
+export function getChapterQuizRecords(): Record<string, ChapterQuizRecord> {
+  return safeGet<Record<string, ChapterQuizRecord>>(STORAGE_KEYS.CHAPTER_QUIZ_SCORES, {});
+}
+
+export function getChapterQuizRecord(chapterId: string): ChapterQuizRecord | undefined {
+  const records = getChapterQuizRecords();
+  return records[chapterId];
+}
+
+export function saveChapterQuizScore(
+  chapterId: string,
+  score: number,
+  total = 15
+): ChapterQuizRecord {
+  const records = getChapterQuizRecords();
+  const percentage = Math.round((score / total) * 100);
+  const gradeInfo = getChapterQuizGrade(score, total);
+  const passed = gradeInfo.isComplete; // Exactly score >= 10 out of 15
+  const existing = records[chapterId];
+
+  const record: ChapterQuizRecord = {
+    chapterId,
+    score: Math.max(score, existing?.score || 0),
+    total,
+    percentage: Math.max(percentage, existing?.percentage || 0),
+    passed: passed || (existing?.passed || false),
+    grade: gradeInfo.grade,
+    completedAt: Date.now(),
+    attemptsCount: (existing?.attemptsCount || 0) + 1
+  };
+
+  records[chapterId] = record;
+  safeSet(STORAGE_KEYS.CHAPTER_QUIZ_SCORES, records);
+
+  // If chapter complete threshold (score >= 10) is met, record in completed chapters list
+  if (passed) {
+    try {
+      const completed = safeGet<string[]>('f3_completed_chapters', []);
+      if (!completed.includes(chapterId)) {
+        safeSet('f3_completed_chapters', [...completed, chapterId]);
+      }
+    } catch {
+      // ignore
+    }
+
+    // Award points
+    addPoints(100, `Achieved Chapter Mastery for ${chapterId} (${score}/${total} - ${gradeInfo.grade})`);
+  } else {
+    addPoints(25, `Attempted Chapter Quiz for ${chapterId} (${score}/${total})`);
+  }
+
+  recordStreakActivity();
+  return record;
+}
+
+export function isChapterQuizPassed(chapterId: string): boolean {
+  const record = getChapterQuizRecord(chapterId);
+  return Boolean(record?.passed);
+}
+
 
 

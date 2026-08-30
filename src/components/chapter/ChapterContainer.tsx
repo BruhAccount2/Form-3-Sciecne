@@ -8,6 +8,7 @@ import { ExperimentView } from './ExperimentView';
 import { AnsweringTechniquesView } from './AnsweringTechniquesView';
 import { SimulationView } from './SimulationView';
 import { AuditView } from './AuditView';
+import { ChapterQuizView } from './ChapterQuizView';
 import { LearningStandardsAuditModal } from './LearningStandardsAuditModal';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { computeChapterKSSMCoverage } from '../../utils/coverage';
@@ -59,7 +60,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
 }) => {
   const [mainSection, setMainSection] = useState<MainChapterSection>('learn');
   const [learnSubTab, setLearnSubTab] = useState<'notes' | 'mindmap' | 'simulations' | 'experiments'>('notes');
-  const [practiseSubTab, setPractiseSubTab] = useState<'exercises' | 'answers' | 'techniques'>('exercises');
+  const [practiseSubTab, setPractiseSubTab] = useState<'quiz' | 'exercises' | 'answers' | 'techniques'>('quiz');
   const [checkSubTab, setCheckSubTab] = useState<'coverage' | 'mastery'>('coverage');
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -355,6 +356,16 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
           {mainSection === 'practise' && (
             <>
               <button
+                onClick={() => setPractiseSubTab('quiz')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+                  practiseSubTab === 'quiz'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                <span>⚡ 15-Q Chapter Quiz</span>
+              </button>
+              <button
                 onClick={() => setPractiseSubTab('exercises')}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
                   practiseSubTab === 'exercises'
@@ -382,7 +393,7 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
                     : 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
-                🎯 Exam Answering Techniques
+                🎯 Exam Techniques
               </button>
             </>
           )}
@@ -437,6 +448,15 @@ export const ChapterContainer: React.FC<ChapterContainerProps> = ({
             {/* PRACTISE SECTION RENDERING */}
             {mainSection === 'practise' && (
               <>
+                {practiseSubTab === 'quiz' && (
+                  <ChapterQuizView 
+                    chapter={chapter} 
+                    onNavigateNotes={() => {
+                      setMainSection('learn');
+                      setLearnSubTab('notes');
+                    }}
+                  />
+                )}
                 {practiseSubTab === 'exercises' && <ExercisesView chapter={chapter} />}
                 {practiseSubTab === 'answers' && <AnswersView chapter={chapter} />}
                 {practiseSubTab === 'techniques' && <AnsweringTechniquesView chapter={chapter} />}

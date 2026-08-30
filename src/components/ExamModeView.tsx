@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SubjectType, ExamQuestionItem, ExamSubmission } from '../types';
+import { getRandomPracticeQuestions } from '../data/quizUtils';
 import { mathChapters } from '../data/math';
 import { scienceChapters } from '../data/science';
-import { saveExamSubmission, recordQuestionAttempt, recordRevisionActivity } from '../utils/storage';
+import { 
+  saveExamSubmission, 
+  recordQuestionAttempt, 
+  recordRevisionActivity,
+  addPoints,
+  recordStreakActivity 
+} from '../utils/storage';
 import { sanitizeContent } from '../utils/symbolSanitizer';
 import { 
   Timer, 
@@ -67,68 +74,7 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
   }, [isExamRunning, timeLeftSeconds]);
 
   const handleStartExam = () => {
-    const pool: ExamQuestionItem[] = [];
-
-    if (subject === 'both' || subject === 'math') {
-      mathChapters.forEach(ch => {
-        ch.exercises.forEach(ex => {
-          pool.push({
-            id: `exam-math-${ch.id}-${ex.id}`,
-            subject: 'math',
-            chapterId: ch.id,
-            chapterNumber: ch.chapterNumber,
-            chapterTitle: ch.title,
-            topic: `Math Ch ${ch.chapterNumber}: ${ch.title}`,
-            question: ex.question,
-            options: [
-              ex.answer.finalAnswer,
-              'Option B (Alternate representation)',
-              'Option C (Inverse magnitude)',
-              'Option D (Common distractor)'
-            ],
-            correctIndex: 0,
-            explanation: ex.answer.scientificReasoning || ex.answer.fullWorking?.join(' ') || 'Standard step-by-step mathematical deduction.',
-            marks: 2,
-            difficulty: ex.difficulty
-          });
-        });
-      });
-    }
-
-    if (subject === 'both' || subject === 'science') {
-      scienceChapters.forEach(ch => {
-        ch.exercises.forEach(ex => {
-          pool.push({
-            id: `exam-sci-${ch.id}-${ex.id}`,
-            subject: 'science',
-            chapterId: ch.id,
-            chapterNumber: ch.chapterNumber,
-            chapterTitle: ch.title,
-            topic: `Science Ch ${ch.chapterNumber}: ${ch.title}`,
-            question: ex.question,
-            options: [
-              ex.answer.finalAnswer,
-              'Option B (Distractor factor)',
-              'Option C (Counter hypothesis)',
-              'Option D (Secondary state)'
-            ],
-            correctIndex: 0,
-            explanation: ex.answer.scientificReasoning || 'Scientific rationale based on KSSM Form 3 Learning Standards.',
-            marks: 2,
-            difficulty: ex.difficulty
-          });
-        });
-      });
-    }
-
-    const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, questionCount);
-    // Shuffle options
-    selected.forEach(q => {
-      const orig = q.options[q.correctIndex];
-      const shuff = [...q.options].sort(() => Math.random() - 0.5);
-      q.correctIndex = shuff.indexOf(orig);
-      q.options = shuff;
-    });
+    const selected = getRandomPracticeQuestions(subject, questionCount);
 
     setQuestions(selected);
     setCurrentIndex(0);
@@ -217,6 +163,10 @@ export const ExamModeView: React.FC<ExamModeViewProps> = ({ onNavigateChapter, o
     saveExamSubmission(submission);
     setSubmissionResult(submission);
     setIsSubmitted(true);
+
+    // Record streak & award exam points
+    recordStreakActivity();
+    addPoints(score * 15 + 50, `Completed Timed Exam (${score}/${questions.length} - ${percentage}%)`);
   };
 
   const formatTime = (secs: number) => {

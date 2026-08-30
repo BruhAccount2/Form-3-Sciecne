@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { QuickRevisionData, SubjectType } from '../types';
 import { quickRevisionDataList } from '../data/quickRevision';
 import { recordQuestionAttempt, recordRevisionActivity } from '../utils/storage';
 import { sanitizeContent } from '../utils/symbolSanitizer';
+import { shuffleQuestionOptions } from '../data/quizUtils';
 import { 
   Zap, 
   Clock, 
@@ -26,6 +27,12 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
   const [showResults, setShowResults] = useState<Record<string, boolean>>({});
 
   const currentModule = quickRevisionDataList.find(q => q.chapterId === selectedChapterId) || quickRevisionDataList[0];
+
+  // Randomize / shuffle options for rapidFireQuestions to eliminate Option A bias
+  const shuffledRapidQuestions = useMemo(() => {
+    if (!currentModule) return [];
+    return currentModule.rapidFireQuestions.map(q => shuffleQuestionOptions(q));
+  }, [selectedChapterId, currentModule]);
 
   const handleSelectOption = (questionId: string, optionIndex: number, correctIndex: number, topic: string) => {
     if (showResults[questionId]) return;
@@ -207,7 +214,7 @@ export const QuickRevisionView: React.FC<QuickRevisionViewProps> = ({ onNavigate
               </p>
 
               <div className="space-y-6">
-                {currentModule.rapidFireQuestions.map((q, qIdx) => {
+                {shuffledRapidQuestions.map((q, qIdx) => {
                   const isAnswered = showResults[q.id];
                   const chosenOption = userAnswers[q.id];
                   const isCorrect = chosenOption === q.correctIndex;
