@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { SubjectType, Chapter } from '../types';
 import { getChaptersBySubject } from '../data';
-import { Search, CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Search, CheckCircle2, ChevronRight, ArrowLeft, Award } from 'lucide-react';
+import { getChapterQuizRecord } from '../utils/storage';
 
 interface SubjectViewProps {
   subject: SubjectType;
@@ -123,6 +124,7 @@ export const SubjectView: React.FC<SubjectViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredChapters.map((chapter) => {
             const isDone = completedChapterIds.includes(chapter.id);
+            const quizRecord = getChapterQuizRecord(chapter.id);
             const padNum = String(chapter.chapterNumber).padStart(2, '0');
             return (
               <div
@@ -141,21 +143,21 @@ export const SubjectView: React.FC<SubjectViewProps> = ({
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleCompleteChapter(chapter.id);
-                      }}
-                      title={isDone ? 'Mark as incomplete' : 'Mark as completed'}
-                      className={`p-1.5 rounded-lg border transition ${
-                        isDone
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:border-emerald-700 dark:text-emerald-400'
-                          : 'border-gray-200 text-gray-400 hover:border-[#2563EB] hover:text-[#2563EB] dark:border-slate-700 dark:hover:text-blue-400'
-                      }`}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </button>
+                    {quizRecord?.passed ? (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 inline-flex items-center gap-1 shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Mastered ({quizRecord.score}/15)</span>
+                      </span>
+                    ) : quizRecord ? (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800 inline-flex items-center gap-1 shrink-0">
+                        <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        <span>{quizRecord.score}/15 (≥10 to Pass)</span>
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 shrink-0">
+                        Test Required
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="mt-3 text-base font-bold text-[#0F172A] group-hover:text-[#2563EB] dark:text-white dark:group-hover:text-blue-400 transition-colors">

@@ -800,7 +800,7 @@ export function getChapterQuizGrade(score: number, total = 15): {
       colorClass: 'blue'
     };
   }
-  if (score >= 5 && score <= 10) {
+  if (score >= 6 && score <= 10) {
     const isComplete = score >= 10;
     return {
       grade: 'PASS',
@@ -828,6 +828,21 @@ export function getChapterQuizRecord(chapterId: string): ChapterQuizRecord | und
   return records[chapterId];
 }
 
+/**
+ * Returns strictly verified completed chapter IDs (best score >= 10/15)
+ */
+export function getVerifiedCompletedChapters(): string[] {
+  const records = getChapterQuizRecords();
+  const verified: string[] = [];
+  Object.entries(records).forEach(([chapterId, record]) => {
+    if (record && record.score >= 10) {
+      verified.push(chapterId);
+    }
+  });
+  safeSet('f3_completed_chapters', verified);
+  return verified;
+}
+
 export function saveChapterQuizScore(
   chapterId: string,
   score: number,
@@ -839,13 +854,20 @@ export function saveChapterQuizScore(
   const passed = gradeInfo.isComplete; // Exactly score >= 10 out of 15
   const existing = records[chapterId];
 
+  // Best attempt preservation: if current attempt score is higher, update score, percentage & grade
+  const isNewBest = !existing || score > existing.score;
+  const bestScore = isNewBest ? score : existing.score;
+  const bestPercentage = isNewBest ? percentage : existing.percentage;
+  const bestGrade = isNewBest ? gradeInfo.grade : (existing.grade || getChapterQuizGrade(bestScore, total).grade);
+  const isNowPassed = bestScore >= 10;
+
   const record: ChapterQuizRecord = {
     chapterId,
-    score: Math.max(score, existing?.score || 0),
+    score: bestScore,
     total,
-    percentage: Math.max(percentage, existing?.percentage || 0),
-    passed: passed || (existing?.passed || false),
-    grade: gradeInfo.grade,
+    percentage: bestPercentage,
+    passed: isNowPassed,
+    grade: bestGrade,
     completedAt: Date.now(),
     attemptsCount: (existing?.attemptsCount || 0) + 1
   };
@@ -853,21 +875,20 @@ export function saveChapterQuizScore(
   records[chapterId] = record;
   safeSet(STORAGE_KEYS.CHAPTER_QUIZ_SCORES, records);
 
-  // If chapter complete threshold (score >= 10) is met, record in completed chapters list
-  if (passed) {
-    try {
-      const completed = safeGet<string[]>('f3_completed_chapters', []);
-      if (!completed.includes(chapterId)) {
-        safeSet('f3_completed_chapters', [...completed, chapterId]);
-      }
-    } catch {
-      // ignore
-    }
+  // Sync with f3_completed_chapters list
+  getVerifiedCompletedChapters();
 
-    // Award points
-    addPoints(100, `Achieved Chapter Mastery for ${chapterId} (${score}/${total} - ${gradeInfo.grade})`);
+  // Priority 3: Anti-XP Farming
+  // Award 100 XP Mastery bonus ONLY on the first time passing with >= 10/15
+  const wasAlreadyPassed = existing?.passed || (existing && existing.score >= 10);
+  if (passed && !wasAlreadyPassed) {
+    addPoints(100, `Achieved Chapter Mastery for Chapter ${chapterId} (${score}/${total} - ${gradeInfo.grade})`);
+  } else if (passed && wasAlreadyPassed) {
+    // Retake pass awards standard practice XP
+    addPoints(10, `Retook Chapter Quiz for ${chapterId} (${score}/${total} - ${gradeInfo.grade})`);
   } else {
-    addPoints(25, `Attempted Chapter Quiz for ${chapterId} (${score}/${total})`);
+    // Attempt with score < 10
+    addPoints(5, `Attempted Chapter Quiz for ${chapterId} (${score}/${total})`);
   }
 
   recordStreakActivity();

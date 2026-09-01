@@ -38,13 +38,29 @@ export const DailyRevisionView: React.FC<DailyRevisionViewProps> = ({ onNavigate
   const [isCompleted, setIsCompleted] = useState(false);
   const [streakCount, setStreakCount] = useState<number>(() => getStreakData().currentStreak);
   const [activeViewerSvg, setActiveViewerSvg] = useState<string | null>(null);
+  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
 
-  // Generate a deterministic 10-question authored daily set based on today's date
+  // Generate a deterministic 20-question authored daily set based on today's date
   useEffect(() => {
     const questions = getDailyRevisionQuestions(new Date());
     setDailyQuestions(questions);
     setStreakCount(getStreakData().currentStreak);
   }, []);
+
+  // Timer ticker
+  useEffect(() => {
+    if (isCompleted || dailyQuestions.length === 0) return;
+    const timer = setInterval(() => {
+      setSecondsElapsed(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isCompleted, dailyQuestions.length]);
+
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainderSecs = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${remainderSecs.toString().padStart(2, '0')}`;
+  };
 
   const currentQ = dailyQuestions[currentIndex];
   const isCurrentSubmitted = currentQ && submittedAnswers[currentIndex] !== undefined;
@@ -82,13 +98,13 @@ export const DailyRevisionView: React.FC<DailyRevisionViewProps> = ({ onNavigate
     setStreakCount(updatedStreak.currentStreak);
 
     const score = calculateScore();
-    addPoints(score * 10 + 30, `Completed Daily Revision Set (${score}/${dailyQuestions.length})`);
+    addPoints(score * 10 + 50, `Completed Daily 20-Question Revision Set (${score}/${dailyQuestions.length})`);
 
     recordRevisionActivity({
       type: 'daily_revision',
       subject: 'math',
-      title: "Today's Daily Revision Set",
-      subtitle: `Completed 10 questions (${Math.round((score / dailyQuestions.length) * 100)}%)`
+      title: "Today's 20-Question Daily Revision Set",
+      subtitle: `Completed 20 questions in ${formatTime(secondsElapsed)} (${Math.round((score / dailyQuestions.length) * 100)}%)`
     });
   };
 
@@ -96,6 +112,22 @@ export const DailyRevisionView: React.FC<DailyRevisionViewProps> = ({ onNavigate
     let score = 0;
     dailyQuestions.forEach((q, idx) => {
       if (submittedAnswers[idx] === q.correctIndex) score++;
+    });
+    return score;
+  };
+
+  const calculateMathScore = () => {
+    let score = 0;
+    dailyQuestions.forEach((q, idx) => {
+      if (q.subject === 'math' && submittedAnswers[idx] === q.correctIndex) score++;
+    });
+    return score;
+  };
+
+  const calculateScienceScore = () => {
+    let score = 0;
+    dailyQuestions.forEach((q, idx) => {
+      if (q.subject === 'science' && submittedAnswers[idx] === q.correctIndex) score++;
     });
     return score;
   };
@@ -115,16 +147,26 @@ export const DailyRevisionView: React.FC<DailyRevisionViewProps> = ({ onNavigate
             Today's Revision Set
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">
-            10 curated questions across Math & Science to build your daily study habit.
+            20 curated questions (10 Mathematics + 10 Science) to build your daily study habit.
           </p>
         </div>
 
-        {/* Streak Badge */}
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-xl shrink-0 self-start">
-          <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <div>
-            <div className="text-xs font-bold text-amber-900 dark:text-amber-200">{streakCount} Day Streak</div>
-            <div className="text-2xs text-amber-700 dark:text-amber-400">Keep it up!</div>
+        {/* Header Badges: Timer & Streak */}
+        <div className="flex items-center gap-3 shrink-0 self-start">
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 rounded-xl">
+            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div>
+              <div className="text-2xs text-blue-600 dark:text-blue-400 uppercase font-semibold">Time Elapsed</div>
+              <div className="text-xs font-mono font-bold text-blue-900 dark:text-blue-200">{formatTime(secondsElapsed)}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-xl">
+            <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
+            <div>
+              <div className="text-xs font-bold text-amber-900 dark:text-amber-200">{streakCount} Day Streak</div>
+              <div className="text-2xs text-amber-700 dark:text-amber-400">Keep it up!</div>
+            </div>
           </div>
         </div>
       </div>
@@ -280,26 +322,70 @@ export const DailyRevisionView: React.FC<DailyRevisionViewProps> = ({ onNavigate
         )
       ) : (
         /* Summary Score View */
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center space-y-6 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-10 text-center space-y-6 shadow-xs">
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300 mx-auto flex items-center justify-center">
             <Award className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Daily Revision Completed!
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 mb-2">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Daily Revision Completed
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+              Score: {calculateScore()} / {dailyQuestions.length} ({Math.round((calculateScore() / dailyQuestions.length) * 100)}%)
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              You scored {calculateScore()} out of {dailyQuestions.length} ({Math.round((calculateScore() / dailyQuestions.length) * 100)}%). Streak updated to {streakCount} days!
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5">
+              Completed 20 questions in <span className="font-mono font-bold text-slate-900 dark:text-white">{formatTime(secondsElapsed)}</span>. Streak updated to <span className="font-bold text-amber-600 dark:text-amber-400">{streakCount} days</span>!
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 pt-4">
+          {/* Breakdown Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left">
+            <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30">
+              <div className="text-2xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                Mathematics (10 Qs)
+              </div>
+              <div className="text-xl font-extrabold text-indigo-950 dark:text-indigo-100 mt-1">
+                {calculateMathScore()} / 10
+              </div>
+              <div className="text-2xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+                {Math.round((calculateMathScore() / 10) * 100)}% accuracy
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30">
+              <div className="text-2xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                Science (10 Qs)
+              </div>
+              <div className="text-xl font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">
+                {calculateScienceScore()} / 10
+              </div>
+              <div className="text-2xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {Math.round((calculateScienceScore() / 10) * 100)}% accuracy
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30">
+              <div className="text-2xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                XP Rewarded
+              </div>
+              <div className="text-xl font-extrabold text-amber-950 dark:text-amber-100 mt-1">
+                +{calculateScore() * 10 + 50} XP
+              </div>
+              <div className="text-2xs text-amber-600 dark:text-amber-400 mt-0.5">
+                Includes completion bonus
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => {
                 setIsCompleted(false);
                 setCurrentIndex(0);
                 setSelectedOption(null);
                 setSubmittedAnswers({});
+                setSecondsElapsed(0);
               }}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
             >

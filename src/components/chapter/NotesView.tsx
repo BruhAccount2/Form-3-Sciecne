@@ -30,11 +30,13 @@ import {
   Radio,
   Search,
   BookCheck,
-  FastForward
+  FastForward,
+  Award
 } from 'lucide-react';
 import { McqFeedback } from '../McqFeedback';
 import { ImageViewerModal } from '../ImageViewerModal';
 import { ChapterEndTest } from './ChapterEndTest';
+import { getChapterQuizRecord } from '../../utils/storage';
 
 interface NotesViewProps {
   chapter: Chapter;
@@ -47,8 +49,17 @@ export const NotesView: React.FC<NotesViewProps> = ({
   isCompleted,
   onToggleComplete
 }) => {
+  const quizRecord = getChapterQuizRecord(chapter.id);
+
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleScrollToTest = () => {
+    const el = document.getElementById('chapter-end-test');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -70,18 +81,21 @@ export const NotesView: React.FC<NotesViewProps> = ({
             </p>
           </div>
 
-          <button
-            id="mark-completed-btn"
-            onClick={onToggleComplete}
-            className={`self-start shrink-0 hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition ${
-              isCompleted
-                ? 'bg-emerald-600 text-white dark:bg-emerald-500'
-                : 'border border-gray-200 bg-white text-gray-700 hover:border-[#2563EB] hover:text-[#2563EB] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-400'
-            }`}
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            <span>{isCompleted ? 'Completed ✓' : 'Mark Done'}</span>
-          </button>
+          {quizRecord?.passed ? (
+            <div className="self-start shrink-0 hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Mastered ({quizRecord.score}/15)</span>
+            </div>
+          ) : (
+            <button
+              id="scroll-to-chapter-test-btn"
+              onClick={handleScrollToTest}
+              className="self-start shrink-0 hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold border border-blue-200 bg-blue-50/50 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 transition cursor-pointer"
+            >
+              <Award className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span>Chapter Test (≥10 to complete)</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -116,33 +130,55 @@ export const NotesView: React.FC<NotesViewProps> = ({
       />
 
       {/* Completion Banner */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/60">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-[#2563EB] dark:bg-blue-950 dark:text-blue-400 shrink-0">
-            <BookOpen className="h-5 w-5" />
+      {quizRecord?.passed ? (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-800 dark:bg-emerald-950/40">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                Chapter Mastered! Score: {quizRecord.score}/15 ({quizRecord.grade})
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                You have satisfied the KSSM mastery requirement for Chapter {chapter.chapterNumber}.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-sm font-bold text-[#0F172A] dark:text-white">
-              Finished reviewing this chapter's notes?
-            </h4>
-            <p className="text-xs text-gray-500 dark:text-slate-400">
-              Practice exam questions or test your memory with the concept mindmap.
-            </p>
-          </div>
-        </div>
 
-        <button
-          onClick={onToggleComplete}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-            isCompleted
-              ? 'bg-emerald-600 text-white'
-              : 'bg-[#2563EB] text-white hover:bg-blue-700 dark:bg-blue-500'
-          }`}
-        >
-          <Check className="h-4 w-4" />
-          <span>{isCompleted ? 'Marked as Done' : 'Complete Topic'}</span>
-        </button>
-      </div>
+          <button
+            onClick={handleScrollToTest}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition cursor-pointer"
+          >
+            <span>Review / Retake Test</span>
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/40">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-[#2563EB] dark:bg-blue-950 dark:text-blue-400 shrink-0">
+              <Award className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#0F172A] dark:text-white">
+                Ready to Complete Chapter {chapter.chapterNumber}?
+              </h4>
+              <p className="text-xs text-gray-600 dark:text-slate-400">
+                Pass the 15-question Chapter Test above with at least 10/15 to earn mastery and mark this chapter complete.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleScrollToTest}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#2563EB] text-white hover:bg-blue-700 dark:bg-blue-600 transition shadow-xs cursor-pointer"
+          >
+            <span>Take Chapter Test</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
     </div>
   );

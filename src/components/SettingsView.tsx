@@ -30,17 +30,23 @@ import {
 
 interface SettingsViewProps {
   darkMode: boolean;
-  setDarkMode: (val: boolean | ((prev: boolean) => boolean)) => void;
+  themeMode: 'light' | 'dark' | 'system';
+  setThemeMode: (val: 'light' | 'dark' | 'system') => void;
   fontSize: 'normal' | 'large' | 'xlarge';
   setFontSize: (val: 'normal' | 'large' | 'xlarge') => void;
+  uiScale: number;
+  setUiScale: (val: number) => void;
   onNavigateHome: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   darkMode,
-  setDarkMode,
+  themeMode,
+  setThemeMode,
   fontSize,
   setFontSize,
+  uiScale,
+  setUiScale,
   onNavigateHome
 }) => {
   const [stats, setStats] = useState<UserStorageStats>(() => getStorageStats());
@@ -135,11 +141,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
-            onClick={() => setDarkMode(false)}
+            onClick={() => setThemeMode('light')}
             className={`flex items-center justify-between p-4 rounded-xl border transition ${
-              !darkMode
+              themeMode === 'light'
                 ? 'border-blue-600 bg-blue-50/50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-200 font-semibold'
                 : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
             }`}
@@ -147,17 +153,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <div className="flex items-center gap-3">
               <Sun className="w-5 h-5 text-amber-500" />
               <div className="text-left">
-                <div className="text-sm font-medium">Light Mode</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">High-contrast bright daylight theme</div>
+                <div className="text-sm font-medium">Light</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Bright daylight</div>
               </div>
             </div>
-            {!darkMode && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+            {themeMode === 'light' && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
           </button>
 
           <button
-            onClick={() => setDarkMode(true)}
+            onClick={() => setThemeMode('dark')}
             className={`flex items-center justify-between p-4 rounded-xl border transition ${
-              darkMode
+              themeMode === 'dark'
                 ? 'border-blue-600 bg-blue-50/50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-200 font-semibold'
                 : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
             }`}
@@ -165,12 +171,69 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <div className="flex items-center gap-3">
               <Moon className="w-5 h-5 text-blue-500" />
               <div className="text-left">
-                <div className="text-sm font-medium">Dark Mode</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">Eye-friendly for night revision sessions</div>
+                <div className="text-sm font-medium">Dark</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Night revision</div>
               </div>
             </div>
-            {darkMode && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+            {themeMode === 'dark' && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
           </button>
+
+          <button
+            onClick={() => setThemeMode('system')}
+            className={`flex items-center justify-between p-4 rounded-xl border transition ${
+              themeMode === 'system'
+                ? 'border-blue-600 bg-blue-50/50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-200 font-semibold'
+                : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5 text-emerald-500" />
+              <div className="text-left">
+                <div className="text-sm font-medium">System</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Sync with OS ({darkMode ? 'Dark' : 'Light'})</div>
+              </div>
+            </div>
+            {themeMode === 'system' && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Section 2: Website & UI Scaling (Zoom) */}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Layers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                Website & UI Scaling
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Scale the overall layout size for comfortable viewing on laptops, tablets, or monitors.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            {uiScale}%
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[90, 100, 110, 125].map(scale => (
+            <button
+              key={scale}
+              onClick={() => setUiScale(scale)}
+              className={`p-3.5 rounded-xl border text-center transition ${
+                uiScale === scale
+                  ? 'border-indigo-600 bg-indigo-50/60 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/40 dark:text-indigo-200 font-bold shadow-xs'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              <div className="text-sm font-bold">{scale}%</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {scale === 100 ? 'Default 1:1' : scale === 90 ? 'Compact' : scale === 110 ? 'Enlarged' : 'Ultra Large'}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 

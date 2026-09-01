@@ -201,30 +201,30 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* Quick Links Row: Glossary · Formula Sheet · Past Papers · Random Practice · Daily Challenge */}
+        {/* Quick Links Row: Test Yourself · Marking Scheme · Glossary · Formula Sheet · Past Papers */}
         <div className="pt-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
-            Quick Revision Tools
+            Exam & Revision Tools
           </span>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <button
-              onClick={() => onNavigateView('glossary')}
-              className="p-3.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-500 transition text-center shadow-xs group"
+              onClick={() => onNavigateView('test_yourself')}
+              className="p-3.5 rounded-xl border-2 border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 hover:bg-blue-100/60 dark:hover:bg-blue-900/60 transition text-center shadow-xs group"
             >
-              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400 mx-auto mb-1.5" />
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 block">
-                Glossary
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 mx-auto mb-1.5" />
+              <span className="text-xs font-extrabold text-blue-900 dark:text-blue-200 block">
+                Test Yourself
               </span>
             </button>
 
             <button
-              onClick={() => onNavigateView('formula_sheet')}
-              className="p-3.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-500 transition text-center shadow-xs group"
+              onClick={() => onNavigateView('marking_scheme')}
+              className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/40 dark:border-indigo-800 dark:bg-indigo-950/40 hover:border-indigo-500 transition text-center shadow-xs group"
             >
-              <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mx-auto mb-1.5" />
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 block">
-                Formula Sheet
+              <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mx-auto mb-1.5" />
+              <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200 group-hover:text-indigo-600 block">
+                Marking Scheme
               </span>
             </button>
 
@@ -239,22 +239,22 @@ export const HomePage: React.FC<HomePageProps> = ({
             </button>
 
             <button
-              onClick={() => onNavigateView('random_practice')}
+              onClick={() => onNavigateView('glossary')}
               className="p-3.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-500 transition text-center shadow-xs group"
             >
-              <Shuffle className="w-5 h-5 text-purple-600 dark:text-purple-400 mx-auto mb-1.5" />
+              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400 mx-auto mb-1.5" />
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 block">
-                Random Practice
+                Glossary
               </span>
             </button>
 
             <button
-              onClick={() => onNavigateView('daily_revision')}
+              onClick={() => onNavigateView('formula_sheet')}
               className="p-3.5 rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-500 transition text-center shadow-xs group col-span-2 sm:col-span-1"
             >
-              <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400 mx-auto mb-1.5" />
+              <FileText className="w-5 h-5 text-amber-600 dark:text-amber-400 mx-auto mb-1.5" />
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 block">
-                Daily Challenge
+                Formula Sheet
               </span>
             </button>
           </div>

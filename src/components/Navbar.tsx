@@ -16,7 +16,8 @@ import {
   ChevronDown,
   Menu,
   X,
-  Settings
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { SubjectType, AppView } from '../types';
 
@@ -153,14 +154,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         <button
-          onClick={() => onNavigateView('past_papers')}
-          className={`font-medium transition-colors ${
-            activeView === 'past_papers'
+          onClick={() => onNavigateView('test_yourself')}
+          className={`font-medium transition-colors flex items-center gap-1 ${
+            activeView === 'test_yourself'
               ? 'font-bold text-[#2563EB] dark:text-blue-400'
               : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB]'
           }`}
         >
-          Past Papers
+          <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+          Test Yourself
+        </button>
+
+        <button
+          onClick={() => onNavigateView('marking_scheme')}
+          className={`font-medium transition-colors flex items-center gap-1 ${
+            activeView === 'marking_scheme'
+              ? 'font-bold text-[#2563EB] dark:text-blue-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB]'
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+          Marking Scheme
         </button>
 
         {/* More Tools Dropdown */}
@@ -179,6 +193,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               onMouseLeave={() => setIsMoreMenuOpen(false)}
             >
               <button
+                onClick={() => { onNavigateView('past_papers'); setIsMoreMenuOpen(false); }}
+                className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4 text-emerald-600" />
+                Past Papers Library
+              </button>
+              <button
                 onClick={() => { onNavigateView('quick_revision'); setIsMoreMenuOpen(false); }}
                 className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
               >
@@ -191,13 +212,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Zap className="w-4 h-4 text-amber-500" />
                 Daily Revision Set
-              </button>
-              <button
-                onClick={() => { onNavigateView('exam'); setIsMoreMenuOpen(false); }}
-                className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
-              >
-                <Timer className="w-4 h-4 text-emerald-600" />
-                Timed Exam Simulator
               </button>
               <button
                 onClick={() => { onNavigateView('random_practice'); setIsMoreMenuOpen(false); }}
@@ -324,6 +338,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               Formulae
             </button>
             <button
+              onClick={() => { onNavigateView('test_yourself'); setIsMobileMenuOpen(false); }}
+              className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 text-left font-bold"
+            >
+              Test Yourself
+            </button>
+            <button
+              onClick={() => { onNavigateView('marking_scheme'); setIsMobileMenuOpen(false); }}
+              className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-200 text-left font-bold"
+            >
+              Marking Scheme
+            </button>
+            <button
               onClick={() => { onNavigateView('past_papers'); setIsMobileMenuOpen(false); }}
               className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
             >
@@ -334,12 +360,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
             >
               Quick Revision
-            </button>
-            <button
-              onClick={() => { onNavigateView('exam'); setIsMobileMenuOpen(false); }}
-              className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
-            >
-              Exam Mode
             </button>
             <button
               onClick={() => { onNavigateView('progress'); setIsMobileMenuOpen(false); }}

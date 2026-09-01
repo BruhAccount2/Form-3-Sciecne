@@ -114,7 +114,7 @@ export function mcqToExamItem(mcq: ChapterMCQ): ExamQuestionItem {
 }
 
 /**
- * Get deterministic daily revision set of 10 authored questions (5 Math + 5 Science)
+ * Get deterministic daily revision set of 20 authored questions (10 Math + 10 Science)
  */
 export function getDailyRevisionQuestions(dateSeed = new Date()): ExamQuestionItem[] {
   const dayOfYear = Math.floor((dateSeed.getTime() - new Date(dateSeed.getFullYear(), 0, 0).getTime()) / 86400000);
@@ -125,13 +125,13 @@ export function getDailyRevisionQuestions(dateSeed = new Date()): ExamQuestionIt
   const selectedMath: ChapterMCQ[] = [];
   const selectedScience: ChapterMCQ[] = [];
 
-  for (let i = 0; i < 5; i++) {
-    const mIdx = (dayOfYear * 7 + i * 27) % mathPool.length;
+  for (let i = 0; i < 10; i++) {
+    const mIdx = (dayOfYear * 7 + i * 13) % mathPool.length;
     selectedMath.push(mathPool[mIdx]);
   }
 
-  for (let i = 0; i < 5; i++) {
-    const sIdx = (dayOfYear * 11 + i * 31) % sciencePool.length;
+  for (let i = 0; i < 10; i++) {
+    const sIdx = (dayOfYear * 11 + i * 17) % sciencePool.length;
     selectedScience.push(sciencePool[sIdx]);
   }
 

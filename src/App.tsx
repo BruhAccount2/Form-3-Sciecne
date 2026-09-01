@@ -11,6 +11,8 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { GlossaryView } from './components/GlossaryView';
 import { FormulaSheetView } from './components/FormulaSheetView';
 import { PastPapersView } from './components/PastPapersView';
+import { TestYourselfView } from './components/TestYourselfView';
+import { MarkingSchemeView } from './components/MarkingSchemeView';
 import { QuickRevisionView } from './components/QuickRevisionView';
 import { DailyRevisionView } from './components/DailyRevisionView';
 import { RandomPracticeView } from './components/RandomPracticeView';
@@ -23,15 +25,39 @@ import { AccessibilityModal } from './components/AccessibilityModal';
 import { PrintNotesModal } from './components/PrintNotesModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+import { getVerifiedCompletedChapters, getChapterQuizRecord } from './utils/storage';
+
 export default function App() {
-  // Theme state
+  // Theme state: 'light' | 'dark' | 'system'
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('f3_theme');
+      if (saved === 'dark' || saved === 'light' || saved === 'system') return saved;
+    }
+    return 'system';
+  });
+
+  // Effective dark mode boolean
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('f3_theme');
-      if (saved) return saved === 'dark';
+      if (saved === 'dark') return true;
+      if (saved === 'light') return false;
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     return false;
+  });
+
+  // UI Scale state (Zoom percentage: 90, 100, 110, 125)
+  const [uiScale, setUiScale] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('f3_ui_scale');
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if ([90, 100, 110, 125].includes(parsed)) return parsed;
+      }
+    }
+    return 100;
   });
 
   // Font size state
@@ -43,16 +69,46 @@ export default function App() {
     return 'normal';
   });
 
-  // Apply dark mode class to html element
+  // Handle Theme Mode & System Sync
   useEffect(() => {
-    if (darkMode) {
+    localStorage.setItem('f3_theme', themeMode);
+    
+    if (themeMode === 'dark') {
+      setDarkMode(true);
       document.documentElement.classList.add('dark');
-      localStorage.setItem('f3_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('f3_theme', 'light');
+      return;
     }
-  }, [darkMode]);
+    if (themeMode === 'light') {
+      setDarkMode(false);
+      document.documentElement.classList.remove('dark');
+      return;
+    }
+
+    // System mode: initial check and dynamic listener
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemTheme = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) {
+        setDarkMode(true);
+        document.documentElement.classList.add('dark');
+      } else {
+        setDarkMode(false);
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    updateSystemTheme(mediaQuery);
+    const handler = (e: MediaQueryListEvent) => updateSystemTheme(e);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [themeMode]);
+
+  // Apply UI scale (Zoom)
+  useEffect(() => {
+    localStorage.setItem('f3_ui_scale', uiScale.toString());
+    if (typeof document !== 'undefined') {
+      (document.documentElement.style as any).zoom = `${uiScale}%`;
+    }
+  }, [uiScale]);
 
   // Apply font size style
   useEffect(() => {
@@ -77,22 +133,20 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState<boolean>(false);
   const [printChapter, setPrintChapter] = useState<Chapter | null>(null);
 
-  // Completed chapters stored in localStorage
+  // Verified completed chapters (Derived strictly from bestScore >= 10/15)
   const [completedChapterIds, setCompletedChapterIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('f3_completed_chapters');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    return getVerifiedCompletedChapters();
   });
 
+  const refreshCompletedChapters = () => {
+    setCompletedChapterIds(getVerifiedCompletedChapters());
+  };
+
   const toggleCompleteChapter = (id: string) => {
-    setCompletedChapterIds(prev => {
-      const updated = prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id];
-      localStorage.setItem('f3_completed_chapters', JSON.stringify(updated));
-      return updated;
-    });
+    const record = getChapterQuizRecord(id);
+    if (record && record.score >= 10) {
+      refreshCompletedChapters();
+    }
   };
 
   // Keyboard shortcuts
@@ -178,7 +232,7 @@ export default function App() {
               <ChapterContainer
                 chapter={activeChapter}
                 isCompleted={completedChapterIds.includes(activeChapter.id)}
-                onToggleComplete={() => toggleCompleteChapter(activeChapter.id)}
+                onToggleComplete={refreshCompletedChapters}
                 onSelectChapter={handleSelectChapter}
                 allSubjectChapters={currentSubjectChapters}
                 onBackToSubject={() => setActiveChapterId(null)}
@@ -202,6 +256,18 @@ export default function App() {
             <FormulaSheetView
               onNavigateChapter={handleNavigateChapterById}
               onNavigateHome={handleNavigateHome}
+            />
+          ) : activeView === 'test_yourself' ? (
+            <TestYourselfView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+              onNavigateMarkingScheme={() => handleNavigateView('marking_scheme')}
+            />
+          ) : activeView === 'marking_scheme' ? (
+            <MarkingSchemeView
+              onNavigateChapter={handleNavigateChapterById}
+              onNavigateHome={handleNavigateHome}
+              onNavigateTestYourself={() => handleNavigateView('test_yourself')}
             />
           ) : activeView === 'past_papers' ? (
             <PastPapersView
@@ -251,9 +317,12 @@ export default function App() {
           ) : activeView === 'settings' ? (
             <SettingsView
               darkMode={darkMode}
-              setDarkMode={setDarkMode}
+              themeMode={themeMode}
+              setThemeMode={setThemeMode}
               fontSize={fontSize}
               setFontSize={setFontSize}
+              uiScale={uiScale}
+              setUiScale={setUiScale}
               onNavigateHome={handleNavigateHome}
             />
           ) : (

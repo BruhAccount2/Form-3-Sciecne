@@ -10,6 +10,8 @@ export type AppView =
   | 'chapter'
   | 'glossary'
   | 'past_papers'
+  | 'test_yourself'
+  | 'marking_scheme'
   | 'formula_sheet'
   | 'bookmarks'
   | 'progress'
@@ -66,11 +68,42 @@ export interface PastPaperQuestion {
   topic: string;
   chapterId: string;
   diagramSvg?: string;
+  howToApproach?: string[];
   answer: {
     finalAnswer: string;
     markingScheme: string[];
     explanation?: string;
+    whyIncorrect?: Record<string, string>;
+    acceptableAlternatives?: string[];
   };
+}
+
+export interface SubjectiveMarkingItem {
+  id: string;
+  title: string;
+  subject: SubjectType;
+  chapterId: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  year?: number;
+  sourceType: 'past_paper' | 'ai_generated';
+  sourceName: string;
+  questionNumber: number | string;
+  section: 'Section B' | 'Section C';
+  question: string;
+  diagramSvg?: string;
+  marks: number;
+  expectedAnswer: string;
+  acceptableAlternatives?: string[];
+  workingSteps?: string[];
+  markAllocation: {
+    step: string;
+    mark: number;
+    criteria: string;
+  }[];
+  keyTerms?: string[];
+  commonErrors?: string[];
+  explanation: string;
 }
 
 export interface PastPaper {
