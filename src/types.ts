@@ -1,4 +1,4 @@
-export type SubjectType = 'science' | 'math';
+export type SubjectType = 'science' | 'math' | 'sejarah';
 
 export type MainChapterSection = 'learn' | 'practise' | 'check';
 export type ChapterTab = 'notes' | 'exercises' | 'answers' | 'mindmap' | 'experiment' | 'simulation' | 'simulations' | 'techniques' | 'audit' | 'learn' | 'practise' | 'check';

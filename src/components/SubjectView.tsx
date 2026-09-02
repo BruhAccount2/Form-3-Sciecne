@@ -46,16 +46,18 @@ export const SubjectView: React.FC<SubjectViewProps> = ({
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-widest text-[#2563EB] dark:text-blue-400 block mb-1">
-                KSSM Form 3 DLP Syllabus
+                {subject === 'sejarah' ? 'KSSM Kurikulum Sejarah Tingkatan 3' : 'KSSM Form 3 DLP Syllabus'}
               </span>
               <h1 className="text-3xl font-bold tracking-tight text-[#0F172A] dark:text-white">
-                {subject === 'science' ? 'Form 3 Science' : 'Form 3 Mathematics'}
+                {subject === 'science' ? 'Form 3 Science' : subject === 'math' ? 'Form 3 Mathematics' : 'Form 3 Sejarah'}
               </h1>
               <div className="h-1 w-16 bg-[#2563EB] rounded-full my-2.5"></div>
               <p className="text-xs sm:text-sm text-[#475569] dark:text-slate-400 max-w-2xl leading-relaxed">
                 {subject === 'science'
                   ? 'Complete coverage of all 10 Science chapters: Human physiology, respiration, transportation, reactivity series, thermochemistry, electricity, radioactivity, and space exploration.'
-                  : 'Complete coverage of all 9 Mathematics chapters: Indices, standard form, consumer mathematics, scale drawings, trigonometry, circle theorems, plans & elevations, and straight lines.'}
+                  : subject === 'math'
+                  ? 'Complete coverage of all 9 Mathematics chapters: Indices, standard form, consumer mathematics, scale drawings, trigonometry, circle theorems, plans & elevations, and straight lines.'
+                  : 'Liputan lengkap kesemua 8 Bab Sejarah KSSM Tingkatan 3 dengan istilah rasmi Bahasa Melayu & penerangan dwibahasa (English explanation), garis masa, tokoh penting, teknik menjawab KBAT, dan bank soalan kuiz.'}
               </p>
             </div>
 
@@ -87,7 +89,7 @@ export const SubjectView: React.FC<SubjectViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search ${subject === 'science' ? 'Science' : 'Mathematics'} chapters, keywords...`}
+              placeholder={`Search ${subject === 'science' ? 'Science' : subject === 'math' ? 'Mathematics' : 'Sejarah'} chapters, keywords...`}
               className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-xs text-[#0F172A] shadow-2xs focus:border-[#2563EB] focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
@@ -161,7 +163,7 @@ export const SubjectView: React.FC<SubjectViewProps> = ({
                   </div>
 
                   <h3 className="mt-3 text-base font-bold text-[#0F172A] group-hover:text-[#2563EB] dark:text-white dark:group-hover:text-blue-400 transition-colors">
-                    Chapter {chapter.chapterNumber}: {chapter.title}
+                    {subject === 'sejarah' ? 'Bab' : 'Chapter'} {chapter.chapterNumber}: {chapter.title}
                   </h3>
                   <p className="mt-1.5 text-xs text-gray-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                     {chapter.summary}

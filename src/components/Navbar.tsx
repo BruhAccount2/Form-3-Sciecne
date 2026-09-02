@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#0F172A] dark:text-white leading-tight">
               Form 3 Revision
             </h1>
-            <span className="text-2xs text-slate-400 hidden sm:block">KSSM Science & Maths</span>
+            <span className="text-2xs text-slate-400 hidden sm:block">KSSM Science, Math & Sejarah</span>
           </div>
         </button>
       </div>
@@ -129,6 +129,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           Mathematics
+        </button>
+
+        <button
+          onClick={() => onSelectSubject('sejarah')}
+          className={`font-medium transition-colors ${
+            activeSubject === 'sejarah' && activeView === 'home'
+              ? 'font-bold text-[#2563EB] dark:text-blue-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB]'
+          }`}
+        >
+          Sejarah
         </button>
 
         <button
@@ -324,6 +335,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
             >
               Math (9 Ch)
+            </button>
+            <button
+              onClick={() => { onSelectSubject('sejarah'); setIsMobileMenuOpen(false); }}
+              className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-left"
+            >
+              Sejarah (8 Bab)
             </button>
             <button
               onClick={() => { onNavigateView('glossary'); setIsMobileMenuOpen(false); }}

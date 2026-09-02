@@ -1,6 +1,6 @@
 {
   "name": "Form 3 Revision",
-  "description": "A clean, modern, minimalist revision platform for Malaysian KSSM Form 3 Science and Mathematics students.",
+  "description": "A clean, modern, comprehensive revision platform for Malaysian KSSM Form 3 Science, Mathematics, and Sejarah students.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

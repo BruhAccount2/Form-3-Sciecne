@@ -143,3 +143,50 @@ export const scienceLearningStandards: Record<string, LearningStandardCoverage[]
     { code: '10.2.2', standard: 'Explain applications of space technology: remote sensing (agriculture, meteorology, disaster tracking) and global communications.', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
   ]
 };
+
+export const sejarahLearningStandards: Record<string, LearningStandardCoverage[]> = {
+  'sejarah-ch1': [
+    { code: '7.1.1', standard: 'Menerangkan kestabilan dan kemakmuran negara kita (Stability & Prosperity of our country).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.1.2', standard: 'Menghuraikan faktor kedatangan kuasa Barat ke negara kita (Factors for the arrival of Western powers).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.1.3', standard: 'Menganalisis persaingan antara kuasa Barat untuk mendapatkan tanah jajahan (Western powers rivalry for colonies).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.1.4', standard: 'Menunjukkan perbezaan strategi kuasa Barat untuk menguasai negara kita (Western expansion strategies).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch2': [
+    { code: '7.2.1', standard: 'Menjelaskan peluasan kuasa British di Pulau Pinang, Singapura dan Melaka (British expansion in Penang, Singapore, Melaka).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.2.2', standard: 'Menghubungkaitkan Perjanjian London 1824 dengan pembentukan Negeri-negeri Selat (Anglo-Dutch Treaty 1824 & Straits Settlements).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.2.3', standard: 'Menghuraikan pembentukan dan pentadbiran Negeri-negeri Selat (Formation & Administration of Straits Settlements).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch3': [
+    { code: '7.3.1', standard: 'Menjelaskan kekayaan hasil bumi di Perak, Selangor, Negeri Sembilan dan Pahang (Natural wealth in Perak, Selangor, Negeri Sembilan, Pahang).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.3.2', standard: 'Mengklasifikasikan peluasan kuasa British di Perak, Selangor, Negeri Sembilan dan Pahang (British expansion and Resident system).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.3.3', standard: 'Menghuraikan pembentukan dan pentadbiran Negeri-negeri Melayu Bersekutu (Formation & Administration of Federated Malay States).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch4': [
+    { code: '7.4.1', standard: 'Menjelaskan peluasan kuasa British di Perlis, Kedah, Kelantan dan Terengganu (British expansion in Perlis, Kedah, Kelantan, Terengganu via Bangkok Treaty 1909).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.4.2', standard: 'Menghuraikan peluasan kuasa British di Johor (British expansion in Johor).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.4.3', standard: 'Menganalisis sistem pentadbiran Negeri-negeri Melayu Tidak Bersekutu (Administration system of Unfederated Malay States).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch5': [
+    { code: '7.5.1', standard: 'Menyatakan latar belakang pemerintahan tempatan di Sarawak dan Sabah (Indigenous governance in Sarawak and Sabah).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.5.2', standard: 'Menjelaskan peluasan kuasa Dinasti Brooke di Sarawak (Brooke Dynasty expansion in Sarawak).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.5.3', standard: 'Menghuraikan peluasan kuasa Syarikat Borneo Utara British di Sabah (British North Borneo Chartered Company expansion in Sabah).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.5.4', standard: 'Menjelaskan bentuk pentadbiran Barat di Sarawak dan Sabah (Western administrative structures in Sarawak and Sabah).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch6': [
+    { code: '7.6.1', standard: 'Menyatakan pengenalan ekonomi moden oleh kuasa Barat di negara kita (Introduction of modern commercial economy).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.6.2', standard: 'Menghuraikan pentadbiran Barat berkaitan dengan ekonomi (Colonial economic institutional policies).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.6.3', standard: 'Mewajarkan kesan ekonomi akibat pentadbiran Barat di negara kita (Economic effects of Western administration).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '7.6.4', standard: 'Menilai kesan sosial akibat pentadbiran Barat di negara kita (Social impacts: urbanization, plural society, education, health).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch7': [
+    { code: '8.1.1', standard: 'Menerangkan matlamat dan bentuk penentangan masyarakat tempatan (Goals & forms of local community resistance).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '8.1.2', standard: 'Menghuraikan sistem pentadbiran Barat memberi kesan terhadap kuasa pemerintah dan kehidupan masyarakat tempatan (Colonial impact on local rulers and lifestyle).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '8.1.3', standard: 'Menilai penentangan masyarakat tempatan terhadap kuasa Barat (Evaluation of local resistance figures, battles, and outcomes).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ],
+  'sejarah-ch8': [
+    { code: '8.2.1', standard: 'Menerangkan reaksi pemerintah Negeri-negeri Melayu Utara dan Johor terhadap tindakan Barat (Reactions of Northern Malay States and Johor rulers).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '8.2.2', standard: 'Menghuraikan tindakan raja Melayu dalam menangani cabaran Barat (Statecraft and institutional actions of Malay Rulers).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '8.2.3', standard: 'Menilai usaha pembesar Melayu dalam pemodenan negeri (Modernization initiatives led by Malay chiefs).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true },
+    { code: '8.2.4', standard: 'Merumuskan keberkesanan peranan pemerintah tempatan dalam menangani cabaran Barat (Synthesis of local leadership efficacy and sovereignty legacy).', notesCoverage: true, exerciseCoverage: true, answerCoverage: true }
+  ]
+};

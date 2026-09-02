@@ -1,6 +1,7 @@
 import { SubjectType, Difficulty, ExamQuestionItem } from '../types';
 import { mathChapterQuizBank } from './mathQuizBank';
 import { scienceChapterQuizBank } from './scienceQuizBank';
+import { sejarahChapterQuizBank } from './sejarahQuizBank';
 
 export interface ChapterMCQ {
   id: string;
@@ -18,11 +19,12 @@ export interface ChapterMCQ {
 }
 
 /**
- * All authored MCQs across all 19 chapters (135 Math + 150 Science = 285 total)
+ * All authored MCQs across all 27 chapters (135 Math + 150 Science + 120 Sejarah = 405 total)
  */
 export const allChapterQuizQuestions: ChapterMCQ[] = [
   ...mathChapterQuizBank,
-  ...scienceChapterQuizBank
+  ...scienceChapterQuizBank,
+  ...sejarahChapterQuizBank
 ];
 
 /**
@@ -56,6 +58,10 @@ export function normalizeChapterId(id: string): string {
   }
   if (trimmed.startsWith('math-') && !trimmed.startsWith('math-ch')) {
     return trimmed.replace('math-', 'math-ch');
+  }
+  if (trimmed.startsWith('sej-ch')) return trimmed.replace('sej-ch', 'sejarah-ch');
+  if (trimmed.startsWith('sejarah-') && !trimmed.startsWith('sejarah-ch')) {
+    return trimmed.replace('sejarah-', 'sejarah-ch');
   }
   return trimmed;
 }
@@ -114,16 +120,18 @@ export function mcqToExamItem(mcq: ChapterMCQ): ExamQuestionItem {
 }
 
 /**
- * Get deterministic daily revision set of 20 authored questions (10 Math + 10 Science)
+ * Get deterministic daily revision set of 30 authored questions (10 Math + 10 Science + 10 Sejarah)
  */
 export function getDailyRevisionQuestions(dateSeed = new Date()): ExamQuestionItem[] {
   const dayOfYear = Math.floor((dateSeed.getTime() - new Date(dateSeed.getFullYear(), 0, 0).getTime()) / 86400000);
   
   const mathPool = mathChapterQuizBank;
   const sciencePool = scienceChapterQuizBank;
+  const sejarahPool = sejarahChapterQuizBank;
 
   const selectedMath: ChapterMCQ[] = [];
   const selectedScience: ChapterMCQ[] = [];
+  const selectedSejarah: ChapterMCQ[] = [];
 
   for (let i = 0; i < 10; i++) {
     const mIdx = (dayOfYear * 7 + i * 13) % mathPool.length;
@@ -135,7 +143,12 @@ export function getDailyRevisionQuestions(dateSeed = new Date()): ExamQuestionIt
     selectedScience.push(sciencePool[sIdx]);
   }
 
-  return [...selectedMath, ...selectedScience].map(q => mcqToExamItem(shuffleQuestionOptions(q)));
+  for (let i = 0; i < 10; i++) {
+    const jIdx = (dayOfYear * 13 + i * 19) % sejarahPool.length;
+    selectedSejarah.push(sejarahPool[jIdx]);
+  }
+
+  return [...selectedMath, ...selectedScience, ...selectedSejarah].map(q => mcqToExamItem(shuffleQuestionOptions(q)));
 }
 
 /**
@@ -170,7 +183,11 @@ export function getPracticePaperQuestions(
   subject: SubjectType,
   count = 40
 ): ExamQuestionItem[] {
-  const pool = subject === 'math' ? mathChapterQuizBank : scienceChapterQuizBank;
+  const pool = subject === 'math' 
+    ? mathChapterQuizBank 
+    : subject === 'science' 
+    ? scienceChapterQuizBank 
+    : sejarahChapterQuizBank;
   const chapters = Array.from(new Set(pool.map(q => q.chapterId)));
 
   // Pick balanced questions across all chapters

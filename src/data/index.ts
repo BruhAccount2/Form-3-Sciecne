@@ -1,12 +1,14 @@
 import { scienceChapters } from './science';
 import { mathChapters } from './math';
+import { sejarahChapters } from './sejarah';
 import { Chapter, SubjectType } from '../types';
 
-export { scienceChapters, mathChapters };
+export { scienceChapters, mathChapters, sejarahChapters };
 
 export const allChapters: Chapter[] = [
   ...scienceChapters,
-  ...mathChapters
+  ...mathChapters,
+  ...sejarahChapters
 ];
 
 export function getChapterById(id: string): Chapter | undefined {
@@ -14,5 +16,8 @@ export function getChapterById(id: string): Chapter | undefined {
 }
 
 export function getChaptersBySubject(subject: SubjectType): Chapter[] {
-  return subject === 'science' ? scienceChapters : mathChapters;
+  if (subject === 'science') return scienceChapters;
+  if (subject === 'math') return mathChapters;
+  if (subject === 'sejarah') return sejarahChapters;
+  return [];
 }
